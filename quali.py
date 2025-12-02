@@ -24,8 +24,8 @@ def get_measurements(number):
         sep=";",
     )
 
-    df["Zeit"] = pd.to_datetime(df["Zeit"])
-    df = df.set_index("Zeit")
+    df["Tag"] = pd.to_datetime(df["Tag"])
+    df = df.set_index("Tag")
     return df
 
 
@@ -49,14 +49,14 @@ except Exception:
 map = folium.Map([53.8677, 10.68508], zoom_start=12)
 
 for _, row in stations.iterrows():
-    print(row["Breitengrad"])
-    print(row["Längengrad"])
     folium.Marker(
         [row["Breitengrad"], row["Längengrad"]],
         popup=f"{row['Name']} (Nummer {row['Nummer']})",
         tooltip=f"{row['Name']} (Nummer {row['Nummer']})",
         icon=folium.Icon(icon="tint"),
     ).add_to(map)
+    print(row["Nummer"])
+    print(row["Name"]) 
 
 map_data = st_folium(
     map,
@@ -89,6 +89,7 @@ except Exception:
     st.error("Messwerte konnten nicht geladen werden")
     st.stop()
 
+filtered = measurements.Nummer[number]
 filtered = measurements.loc[start:end]
 filtered = filtered.reset_index()
 
