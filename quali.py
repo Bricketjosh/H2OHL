@@ -51,7 +51,7 @@ def get_measurements(number):
     return df
 
 
-
+st.image("UM_H2OHL_Logo.png", width=200)
 st.title("H20HL - Wasserqualität im Großraum Lübeck")
 
 
