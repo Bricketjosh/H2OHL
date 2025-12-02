@@ -10,22 +10,44 @@ from streamlit_folium import st_folium
 
 @st.cache_data
 def get_stations():
+    # parse decimal comma numbers correctly
     df = pd.read_csv(
         "https://raw.githubusercontent.com/Bricketjosh/H2OHL/refs/heads/main/Wakenitzdaten_ML.csv",
         sep=";",
+        decimal=",",
     )
 
     return df
 
 
 def get_measurements(number):
+    # parse decimal comma numbers correctly
     df = pd.read_csv(
         f"https://raw.githubusercontent.com/Bricketjosh/H2OHL/refs/heads/main/Wakenitzdaten_ML.csv",
         sep=";",
+        decimal=",",
     )
 
-    df["Tag"] = pd.to_datetime(df["Tag"])
-    df = df.set_index("Tag")
+    # Tag column is in DD-MM-YY format in the CSV; ensure correct parsing
+    df["Tag"] = pd.to_datetime(df["Tag"], dayfirst=True)
+
+    # Filter by requested station number (the function previously returned the whole dataset)
+    # `number` may be passed as a string from the UI; try to convert to int first
+    try:
+        num = int(number)
+    except Exception:
+        num = number
+
+    df = df[df["Nummer"] == num]
+
+    # set datetime index and make sure it's sorted for label-based slicing
+    df = df.set_index("Tag").sort_index()
+
+    # Try to coerce measurement columns to numeric where possible so we can plot them
+    # Keep text columns like 'Name' and 'Uhrzeit' as-is.
+    for col in df.columns:
+        if col not in ("Name", "Uhrzeit"):
+            df[col] = pd.to_numeric(df[col], errors="coerce")
     return df
 
 
@@ -111,20 +133,51 @@ except Exception:
     st.error("Messwerte konnten nicht geladen werden")
     st.stop()
 
-# filtered = measurements.Nummer[number]
-filtered = measurements.loc[start:end]
-filtered = filtered.reset_index()
+# Convert start/end to timestamps (works for both date and datetime objects) and slice
+start_ts = pd.to_datetime(start, dayfirst=True)
+end_ts = pd.to_datetime(end, dayfirst=True)
+
+# Measurements now already filtered to the chosen station in get_measurements
+# Use a boolean mask for the date range. This works even if the DatetimeIndex
+# is not strictly monotonic and is more robust than label-based slicing.
+mask = (measurements.index >= start_ts) & (measurements.index <= end_ts)
+filtered = measurements.loc[mask].reset_index()
 
 if not filtered.shape[0]:
-    st.info("Keine Messwerte im gewählten Zeitraum")
+    # don't stop the app — we still want to show a chart even when there are no
+    # measurements in the chosen timeframe. Show a short message instead.
+    st.info("Keine Messwerte im gewählten Zeitraum — zeige leeres Diagramm")
+
+# Make sure the time column is available for charting — reset_index() created
+# a 'Tag' column, rename it to 'Zeit' to match UI text
+if "Tag" in filtered.columns:
+    filtered = filtered.rename(columns={"Tag": "Zeit"})
+
+# Build a list of numeric measurement columns we can plot.
+# Exclude columns that are not measurement values.
+exclude_cols = {"Nummer", "Breitengrad", "Längengrad"}
+numeric_candidates = [
+    c for c in measurements.select_dtypes(include="number").columns if c not in exclude_cols
+]
+
+if not numeric_candidates:
+    st.error("Keine numerischen Messwerte zum Anzeigen gefunden")
     st.stop()
+
+# Dropdown zum Auswählen des Messwerts
+measurement_choice = st.selectbox("Messwert auswählen", numeric_candidates, index=0)
+
+# Ensure the selected column exists in 'filtered' (might be empty) — if not present
+# try to add it (will produce NaN rows) so the chart is always renderable.
+if measurement_choice not in filtered.columns:
+    filtered[measurement_choice] = pd.Series(dtype="float64")
 
 chart = (
     alt.Chart(filtered)
     .mark_line()
     .encode(
-        x=alt.X("Zeit", title="Zeit"),
-        y=alt.Y("Wasserqualität", title="Wasserqualität"),
+        x=alt.X("Zeit:T", title="Zeit"),
+        y=alt.Y(f"{measurement_choice}:Q", title=measurement_choice),
     )
 )
 
