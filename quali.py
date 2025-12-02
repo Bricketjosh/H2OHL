@@ -56,7 +56,8 @@ st.title("H20HL - Wasserqualität im Großraum Lübeck")
 
 st.image("logo-thl.jpg", width=100)
 st.write(
-    """H2OHL ist ein UIM-Projekt im Rahmen des Moduls Umweltmonitoring WiSe 2025/26. \\
+    """H2OHL ist ein Studentenprojekt der Technischen Hochschule Lübeck 
+    im Rahmen des Moduls Umweltmonitoring (WiSe 2025/26). \\
     Ziel ist es eine Monitoring- App zu entwickeln, die bereitgestellte \\
     Daten über die Wasserqualität der verschiedenen Gewässer im Großraum \\
     Lübeck sammeln, bündeln und darstellen soll. \\
