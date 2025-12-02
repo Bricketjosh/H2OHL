@@ -78,6 +78,9 @@ st.write(
         WIP! [Labor Prof. Dr. Heymann] (Homepage einfügen) \\
         Datenherausgeber: [Einfügen] \\
         \\
+        WIP! [Entsorgungsbetriebe Lübeck - Klärwerke] (Homepage einfügen) \\
+        Datenherausgeber: [Einfügen] \\
+        \\
     Datenlizenz: (Einfügen)"""  # noqa: E501
 )
 
