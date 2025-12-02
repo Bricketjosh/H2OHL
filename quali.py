@@ -73,11 +73,33 @@ except Exception:
     st.stop()
 
 try:
+    # Dropdown für Zeitraum-Auswahl
+    time_option = st.selectbox(
+        "Zeitraum auswählen",
+        ["Letzte 365 Tage", "2025", "2024", "2023", "2022", "Benutzerdefiniert"]
+    )
+    
     end = datetime.datetime.today()
-    start = end - datetime.timedelta(days=365)
-    start, end = st.date_input("Zeitraum", (start, end), format="DD.MM.YYYY")
+    
+    if time_option == "Letzte 365 Tage":
+        start = end - datetime.timedelta(days=365)
+    elif time_option == "2025":
+        start = datetime.datetime(2025, 1, 1)
+        end = datetime.datetime(2025, 12, 31)
+    elif time_option == "2024":
+        start = datetime.datetime(2024, 1, 1)
+        end = datetime.datetime(2024, 12, 31)
+    elif time_option == "2023":
+        start = datetime.datetime(2023, 1, 1)
+        end = datetime.datetime(2023, 12, 31)
+    elif time_option == "2022":
+        start = datetime.datetime(2022, 1, 1)
+        end = datetime.datetime(2022, 12, 31)
+    else:  # Benutzerdefiniert
+        start, end = st.date_input("Zeitraum", (end - datetime.timedelta(days=365), end), format="DD.MM.YYYY")
+        
 except Exception:
-    st.info("Bitte Start- und Enddatum wählen")
+    st.info("Bitte Zeitraum wählen")
     st.stop()
 
 try:
@@ -89,7 +111,7 @@ except Exception:
     st.error("Messwerte konnten nicht geladen werden")
     st.stop()
 
-filtered = measurements.Nummer[number]
+# filtered = measurements.Nummer[number]
 filtered = measurements.loc[start:end]
 filtered = filtered.reset_index()
 
