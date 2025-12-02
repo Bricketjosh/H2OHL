@@ -11,7 +11,7 @@ from streamlit_folium import st_folium
 @st.cache_data
 def get_stations():
     df = pd.read_csv(
-        "https://hsi-sh.de/pegel/od/pegel.csv",
+        "https://raw.githubusercontent.com/Bricketjosh/H2OHL/refs/heads/main/Wakenitzdaten_ML.csv",
         sep=";",
     )
 
@@ -20,7 +20,7 @@ def get_stations():
 
 def get_measurements(number):
     df = pd.read_csv(
-        f"https://hsi-sh.de/pegel/download/{number}_Messwerte.csv",
+        f"https://raw.githubusercontent.com/Bricketjosh/H2OHL/refs/heads/main/Wakenitzdaten_ML.csv",
         sep=";",
     )
 
@@ -29,12 +29,12 @@ def get_measurements(number):
     return df
 
 
-st.title("Wasserstände Schleswig-Holstein")
+st.title("Wasserqualität Lübeck")
 
 st.write(
-    """Datenquelle: [Hochwasser-Sturmflut-Information Schleswig-Holstein](https://hsi-sh.de) \\
-    Datenherausgeber: [Landesamt für Umwelt Schleswig-Holstein](https://www.schleswig-holstein.de/LFU) \\
-    Datenlizenz: [Datenlizenz Deutschland Namensnennung 2.0](https://www.govdata.de/dl-de/by-2-0)"""  # noqa: E501
+    """Datenquelle: [Wakenitzgruppe](Homepage einfügen) \\
+    Datenherausgeber: [Günter Werner] \\
+    Datenlizenz:"""  # noqa: E501
 )
 
 try:
@@ -49,10 +49,12 @@ except Exception:
 map = folium.Map([53.8677, 10.68508], zoom_start=12)
 
 for _, row in stations.iterrows():
+    print(row["Breitengrad"])
+    print(row["Längengrad"])
     folium.Marker(
-        [row["geogrBreite"], row["geogrLaenge"]],
-        popup=f"{row['pegelName']} (Nummer {row['pegelNummer']})",
-        tooltip=f"{row['pegelName']} (Nummer {row['pegelNummer']})",
+        [row["Breitengrad"], row["Längengrad"]],
+        popup=f"{row['Name']} (Nummer {row['Nummer']})",
+        tooltip=f"{row['Name']} (Nummer {row['Nummer']})",
         icon=folium.Icon(icon="tint"),
     ).add_to(map)
 
@@ -67,7 +69,7 @@ try:
     popup = map_data["last_object_clicked_popup"]
     number = popup[popup.find(" (Nummer ") + 9 : -1]  # noqa: E203
 except Exception:
-    st.info("Bitte Messstation wählen")
+    st.info("Bitte Messpunkt wählen")
     st.stop()
 
 try:
@@ -99,7 +101,7 @@ chart = (
     .mark_line()
     .encode(
         x=alt.X("Zeit", title="Zeit"),
-        y=alt.Y("wasserstand", title="Wasserstand"),
+        y=alt.Y("Wasserqualität", title="Wasserqualität"),
     )
 )
 
