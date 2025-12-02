@@ -51,12 +51,33 @@ def get_measurements(number):
     return df
 
 
-st.title("Wasserqualität Lübeck")
+st.image("/workspaces/H2OHL/UM_H2OHL_Logo.png", width=200)
+st.title("H20HL - Wasserqualität im Großraum Lübeck")
 
+st.image("/workspaces/H2OHL/logo-thl.jpg", width=100)
 st.write(
-    """Datenquelle: [Wakenitzgruppe](Homepage einfügen) \\
-    Datenherausgeber: [Günter Werner] \\
-    Datenlizenz:"""  # noqa: E501
+    """H2OHL ist ein UIM-Projekt im Rahmen des Moduls Umweltmonitoring WiSe 2025/26. \\
+    Ziel ist es eine Monitoring- App zu entwickeln, die bereitgestellte \\
+    Daten über die Wasserqualität der verschiedenen Gewässer im Großraum \\
+    Lübeck sammeln, bündeln und darstellen soll. \\
+    \\
+    Beteiligte Studenten: Joshua S. & Alisa R. \\
+    \\
+    H2OHL ist immer noch WIP! \\
+    \\
+    \\
+    \\
+    Datenquellen: \\
+        WIP! [Interessensgruppe Wakenitz] (Homepage einfügen) \\
+        Datenherausgeber: [Günter Werner] \\
+        \\
+        WIP! [Labor Prof. Dr. Külls] (Homepage einfügen) \\
+        Datenherausgeber: [Einfügen] \\
+        \\
+        WIP! [Labor Prof. Dr. Heymann] (Homepage einfügen) \\
+        Datenherausgeber: [Einfügen] \\
+        \\
+    Datenlizenz: (Einfügen)"""  # noqa: E501
 )
 
 try:
