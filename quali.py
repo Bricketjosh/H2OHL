@@ -54,7 +54,7 @@ def get_measurements(number):
 st.image("UM_H2OHL_Logo.png", width=200)
 st.title("H20HL - Wasserqualität im Großraum Lübeck")
 
-
+st.image("logo-thl.jpg", width=100)
 st.write(
     """H2OHL ist ein UIM-Projekt im Rahmen des Moduls Umweltmonitoring WiSe 2025/26. \\
     Ziel ist es eine Monitoring- App zu entwickeln, die bereitgestellte \\
