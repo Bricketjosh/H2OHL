@@ -69,8 +69,8 @@ st.write(
     \\
     \\
     Datenquellen: \\
-        WIP! [Interessensgruppe Wakenitz] (Homepage einfügen) \\
-        Datenherausgeber: [Günter Werner] \\
+        WIP! [Lübecker Kreisverband der Sportfischer e.V.] (www.angeln-in-luebeck.de) \\
+        Datenherausgeber: [Günter Werner / Thomas Kramp] \\
         \\
         WIP! [Labor Prof. Dr. Külls] (Homepage einfügen) \\
         Datenherausgeber: [Einfügen] \\
