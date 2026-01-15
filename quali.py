@@ -12,7 +12,7 @@ from streamlit_folium import st_folium
 def get_stations():
     # parse decimal comma numbers correctly
     df = pd.read_csv(
-        "https://github.com/Bricketjosh/H2OHL/blob/main/Messpunkte.csv",
+        "https://raw.githubusercontent.com/Bricketjosh/H2OHL/main/Messpunkte.csv",
         sep=";",
         decimal=",",
     )
@@ -23,7 +23,7 @@ def get_stations():
 def get_measurements(number):
     # parse decimal comma numbers correctly
     df = pd.read_csv(
-        f"https://github.com/Bricketjosh/H2OHL/blob/main/Messwerte/{number}_Messwerte.csv",
+        f"https://raw.githubusercontent.com/Bricketjosh/H2OHL/main/Messwerte/{number}_Messwerte.csv",
         sep=";",
         decimal=",",
     )
@@ -95,40 +95,79 @@ except Exception:
 
 map = folium.Map([53.8677, 10.68508], zoom_start=12)
 
+# Create a color mapping for different sources
+color_palette = [
+    "red", "blue", "green", "purple", "orange", "darkred", 
+    "lightred", "darkblue", "darkgreen", "cadetblue", "darkpurple"
+]
+unique_sources = stations["Quelle"].unique()
+source_color_map = {source: color_palette[i % len(color_palette)] for i, source in enumerate(unique_sources)}
+
 for _, row in stations.iterrows():
+    popup_text = f"""<b>{row['Name']}</b><br>
+    Nummer: {row['Nummer']}<br>
+    Quelle: {row['Quelle']}<br>
+    Gewässer: {row['Gewässer']}<br>
+    <strong>STATION_{int(row['Nummer'])}</strong>"""
+    
+    marker_color = source_color_map[row["Quelle"]]
+    
     folium.Marker(
         [row["Breitengrad"], row["Längengrad"]],
-        popup=f"{row['Name']} (Nummer {row['Nummer']})",
+        popup=folium.Popup(popup_text, max_width=250),
         tooltip=f"{row['Name']} (Nummer {row['Nummer']})",
-        icon=folium.Icon(icon="tint"),
+        icon=folium.Icon(icon="tint", color=marker_color),
     ).add_to(map)
-    print(row["Nummer"])
-    print(row["Name"]) 
 
 map_data = st_folium(
     map,
     height=400,
-    returned_objects="last_object_clicked_popup",
+    returned_objects=["last_object_clicked_popup"],
     use_container_width=True,
 )
 
 try:
-    popup = map_data["last_object_clicked_popup"]
-    number = popup[popup.find(" (Nummer ") + 9 : -1]  # noqa: E203
+    if map_data is None or map_data.get("last_object_clicked_popup") is None:
+        st.info("Bitte Messpunkt wählen")
+        st.stop()
+    
+    popup_content = map_data["last_object_clicked_popup"]
+    
+    # Extract station number from popup text using the STATION_XXX marker
+    import re
+    match = re.search(r'STATION_(\d+)', popup_content)
+    if not match:
+        st.error("Stationsnummer konnte nicht extrahiert werden")
+        st.stop()
+    
+    number = int(match.group(1))
+except Exception as e:
+    st.error(f"Fehler beim Lesen der Stationsdaten: {str(e)}")
+    st.stop()
+
+try:
+    measurements = get_measurements(number)
+except URLError as error:
+    st.error(f"Messwerte konnten nicht geladen werden: {error.reason}")
+    st.stop()
 except Exception:
-    st.info("Bitte Messpunkt wählen")
+    st.error("Messwerte konnten nicht geladen werden")
     st.stop()
 
 try:
     # Dropdown für Zeitraum-Auswahl
     time_option = st.selectbox(
         "Zeitraum auswählen",
-        ["Letzte 365 Tage", "2025", "2024", "2023", "2022", "Benutzerdefiniert"]
+        ["Gesamtzeitraum", "Letzte 365 Tage", "2025", "2024", "2023", "2022", "Benutzerdefiniert"]
     )
     
     end = datetime.datetime.today()
     
-    if time_option == "Letzte 365 Tage":
+    if time_option == "Gesamtzeitraum":
+        # Nutze min und max Daten aus den Messungen
+        start = measurements.index.min().to_pydatetime()
+        end = measurements.index.max().to_pydatetime()
+    elif time_option == "Letzte 365 Tage":
         start = end - datetime.timedelta(days=365)
     elif time_option == "2025":
         start = datetime.datetime(2025, 1, 1)
@@ -147,15 +186,6 @@ try:
         
 except Exception:
     st.info("Bitte Zeitraum wählen")
-    st.stop()
-
-try:
-    measurements = get_measurements(number)
-except URLError as error:
-    st.error(f"Messwerte konnten nicht geladen werden: {error.reason}")
-    st.stop()
-except Exception:
-    st.error("Messwerte konnten nicht geladen werden")
     st.stop()
 
 # Convert start/end to timestamps (works for both date and datetime objects) and slice
@@ -180,7 +210,7 @@ if "Tag" in filtered.columns:
 
 # Build a list of numeric measurement columns we can plot.
 # Exclude columns that are not measurement values.
-exclude_cols = {"Nummer", "Breitengrad", "Längengrad"}
+exclude_cols = {"Nummer", "Breitengrad", "Längengrad", "Quelle", "Gewässer"}
 numeric_candidates = [
     c for c in measurements.select_dtypes(include="number").columns if c not in exclude_cols
 ]
@@ -197,12 +227,14 @@ measurement_choice = st.selectbox("Messwert auswählen", numeric_candidates, ind
 if measurement_choice not in filtered.columns:
     filtered[measurement_choice] = pd.Series(dtype="float64")
 
+# Create main chart with primary X-axis (Zeit) and Y-axis (measurement values)
 chart = (
     alt.Chart(filtered)
-    .mark_line()
+    .mark_line(point=True, tooltip=True)
     .encode(
         x=alt.X("Zeit:T", title="Zeit"),
         y=alt.Y(f"{measurement_choice}:Q", title=measurement_choice),
+        tooltip=["Zeit:T", "Uhrzeit:N", f"{measurement_choice}:Q"]
     )
 )
 
