@@ -192,13 +192,6 @@ st.write(
     Daten über die Wasserqualität der verschiedenen Gewässer im Großraum \\
     Lübeck sammeln, bündeln und darstellen soll. \\
     \\
-    \\
-    \\
-    Im Rahmen des NUtzens von OpenData, stellen wir die hier verwendeten Daten zur Verfügung.\\ 
-    In der oberen rechten Ecke des Diagrams kann man zwischen Diagram- und Tabellenansicht\\
-    umschalten und dort auch die dort angezeigten Daten herunterladen.\\
-    \\
-    \\
     Beteiligte Studenten: Joshua S. & Alisa R. \\
     \\
     H2OHL ist immer noch WIP! \\
@@ -385,6 +378,36 @@ try:
             st.metric("Grenzwert", f"{format_limit_value(limit)} {unit}" if unit else format_limit_value(limit))
         with col2:
             st.metric("CAS-Nr.", cas_nr if pd.notna(cas_nr) and cas_nr != "" else "N/A")
+        with col3:
+            # Download button for the raw CSV file
+            try:
+                csv_url = f"https://raw.githubusercontent.com/Bricketjosh/H2OHL/main/Messwerte/{number}_Messwerte.csv"
+                csv_data = pd.read_csv(csv_url, sep=";", decimal=",")
+                csv_string = csv_data.to_csv(index=False, sep=";", decimal=",")
+                st.download_button(
+                    label="📥 CSV Download - Alle Messpunktwerte",
+                    data=csv_string,
+                    file_name=f"Station_{number}_Messwerte.csv",
+                    mime="text/csv",
+                    help="Komplette CSV-Datei herunterladen"
+                )
+                
+                # Download button for filtered CSV (selected time range)
+                csv_data_filtered = csv_data.copy()
+                csv_data_filtered['Tag'] = pd.to_datetime(csv_data_filtered['Tag'], dayfirst=True)
+                mask_download = (csv_data_filtered['Tag'] >= start_ts) & (csv_data_filtered['Tag'] <= end_ts)
+                csv_data_filtered = csv_data_filtered[mask_download]
+                csv_data_filtered['Tag'] = csv_data_filtered['Tag'].dt.strftime('%d-%m-%y')
+                csv_string_filtered = csv_data_filtered.to_csv(index=False, sep=";", decimal=",")
+                st.download_button(
+                    label="📥 CSV Download - Messpunktwerte des Zeitraums",
+                    data=csv_string_filtered,
+                    file_name=f"Station_{number}_Messwerte_{start_ts.strftime('%Y%m%d')}-{end_ts.strftime('%Y%m%d')}.csv",
+                    mime="text/csv",
+                    help=f"CSV-Datei für Zeitraum {start_ts.strftime('%d.%m.%Y')} - {end_ts.strftime('%d.%m.%Y')}"
+                )
+            except Exception:
+                st.write("")  # Leerer Platz wenn Download fehlschlägt
         
         # Get the latest measurement value and show its status
         if measurement_choice in filtered.columns and not filtered.empty:
@@ -407,8 +430,40 @@ try:
             st.markdown(f"**Neuester Messwert: {value_display} | Status: {color_display}**")
     else:
         st.info(f"Keine Grenzwerte für '{measurement_choice}' definiert")
+        # Download buttons even when no limit values exist
+        try:
+            csv_url = f"https://raw.githubusercontent.com/Bricketjosh/H2OHL/main/Messwerte/{number}_Messwerte.csv"
+            csv_data = pd.read_csv(csv_url, sep=";", decimal=",")
+            csv_string = csv_data.to_csv(index=False, sep=";", decimal=",")
+            st.download_button(
+                label="📥 CSV Download - Alle Messpunktwerte",
+                data=csv_string,
+                file_name=f"Station_{number}_Messwerte.csv",
+                mime="text/csv",
+                help="Komplette CSV-Datei herunterladen"
+            )
+            
+            # Download button for filtered CSV (selected time range)
+            csv_data_filtered = csv_data.copy()
+            csv_data_filtered['Tag'] = pd.to_datetime(csv_data_filtered['Tag'], dayfirst=True)
+            mask_download = (csv_data_filtered['Tag'] >= start_ts) & (csv_data_filtered['Tag'] <= end_ts)
+            csv_data_filtered = csv_data_filtered[mask_download]
+            csv_data_filtered['Tag'] = csv_data_filtered['Tag'].dt.strftime('%d-%m-%y')
+            csv_string_filtered = csv_data_filtered.to_csv(index=False, sep=";", decimal=",")
+            st.download_button(
+                label="📥 CSV Download - Messpunktwerte des Zeitraums",
+                data=csv_string_filtered,
+                file_name=f"Station_{number}_Messwerte_{start_ts.strftime('%Y%m%d')}-{end_ts.strftime('%Y%m%d')}.csv",
+                mime="text/csv",
+                help=f"CSV-Datei für Zeitraum {start_ts.strftime('%d.%m.%Y')} - {end_ts.strftime('%d.%m.%Y')}"
+            )
+        except Exception:
+            pass
 except Exception as e:
     st.warning(f"Grenzwerte konnten nicht geladen werden: {str(e)}")
+
+# Info box about chart features
+st.info("💡 Oben rechts in der Ecke des Diagramms kann man zwischen **Diagramm- und Tabellenansicht** wechseln. Außerdem kann man dort auch beides im **Fullscreen** anzeigen lassen.")
 
 # Ensure the selected column exists in 'filtered' (might be empty) — if not present
 # try to add it (will produce NaN rows) so the chart is always renderable.
@@ -481,7 +536,7 @@ if limit is not None:
         alt.Chart(filtered)
         .mark_line(point=True)
         .encode(
-            x=alt.X("Zeit:T", title="Zeit"),
+            x=alt.X("Zeit:T", title="Zeit [Intervall]", axis=alt.Axis(format="%d.%m.%Y")),
             y=alt.Y(f"{measurement_choice}:Q", title=measurement_choice_display),
             tooltip=tooltip_list
         )
@@ -505,7 +560,7 @@ else:
         alt.Chart(filtered)
         .mark_line(point=True)
         .encode(
-            x=alt.X("Zeit:T", title="Zeit"),
+            x=alt.X("Zeit:T", title="Zeit [Intervall]", axis=alt.Axis(format="%d.%m.%Y")),
             y=alt.Y(f"{measurement_choice}:Q", title=measurement_choice_display),
             tooltip=tooltip_list
         )
