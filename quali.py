@@ -12,7 +12,7 @@ from streamlit_folium import st_folium
 def get_stations():
     # parse decimal comma numbers correctly
     df = pd.read_csv(
-        "https://raw.githubusercontent.com/Bricketjosh/H2OHL/refs/heads/main/Wakenitzdaten_ML.csv",
+        "https://github.com/Bricketjosh/H2OHL/blob/main/Messpunkte.csv",
         sep=";",
         decimal=",",
     )
@@ -23,7 +23,7 @@ def get_stations():
 def get_measurements(number):
     # parse decimal comma numbers correctly
     df = pd.read_csv(
-        f"https://raw.githubusercontent.com/Bricketjosh/H2OHL/refs/heads/main/Wakenitzdaten_ML.csv",
+        f"https://github.com/Bricketjosh/H2OHL/blob/main/Messwerte/{number}_Messwerte.csv",
         sep=";",
         decimal=",",
     )
