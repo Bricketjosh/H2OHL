@@ -1,0 +1,17 @@
+Messwert;CAS-Nr;Grenzwert
+Temp_Wasser;;25
+Temp_Luft;;30
+Sichttiefe_m;;0,5
+Leitfähigkeit_µS/cm;;500
+SauerstoffO2_mg/l;7782-44-7;6
+Sättigung_%;7782-44-7;80
+pHWert;;8,5
+AmmoniakNH₃_mg/L;7664-41-7;0,5
+Ammoniak_%;7664-41-7;10
+Ammonium_NH4_mg/L;14798-03-9;2
+Ammonium-N_mg/L;14798-03-9;0,5
+Nitrit_NO2_mg/L;14797-65-0;0,1
+Nitrit-N_mg/L;14797-65-0;0,03
+Nitrat_NO3_mg/L;14797-38-3;50
+Nitrat-N_mg/L;14797-38-3;11,3
+Phosphat_ortho_PO4;14265-44-2;0,15
