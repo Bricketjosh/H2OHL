@@ -19,6 +19,12 @@ def get_limit_values():
     df.columns = df.columns.str.strip()
     if "Messwert" in df.columns:
         df["Messwert"] = df["Messwert"].str.strip()
+        # Clean measurement names to match cleaned column names
+        import re
+        df["Messwert_cleaned"] = df["Messwert"].apply(
+            lambda x: x.replace('[', '_').replace(']', '').replace('°', 'deg').replace('/', '_')
+                      .replace(' ', '_') if pd.notna(x) else x
+        ).apply(lambda x: re.sub(r'_+', '_', x).strip('_') if pd.notna(x) else x)
     return df
 
 
@@ -146,6 +152,32 @@ def get_measurements(number):
     for col in df.columns:
         if col not in ("Name", "Uhrzeit"):
             df[col] = pd.to_numeric(df[col], errors="coerce")
+    
+    # Create a mapping of cleaned column names to original names for later reference
+    # This is done AFTER filtering and processing the data
+    column_mapping = {}
+    cleaned_columns = {}
+    
+    import re
+    for col in df.columns:
+        # Store original name
+        original_col = col
+        # Clean the column name: replace special characters but keep the unit information
+        # Replace brackets with underscores and clean up special characters
+        cleaned = col.replace('[', '_').replace(']', '').replace('°', 'deg').replace('/', '_')
+        cleaned = cleaned.replace(' ', '_')  # Replace spaces with underscores
+        # Remove multiple consecutive underscores
+        cleaned = re.sub(r'_+', '_', cleaned).strip('_')
+        cleaned_columns[col] = cleaned
+        column_mapping[cleaned] = original_col
+    
+    # Rename columns to cleaned versions
+    df = df.rename(columns=cleaned_columns)
+    
+    # Store the column mapping in the dataframe for later use
+    df.attrs['column_mapping'] = column_mapping
+    df.attrs['cleaned_columns'] = cleaned_columns
+    
     return df
 
 
@@ -314,13 +346,25 @@ if not numeric_candidates:
     st.error("Keine numerischen Messwerte zum Anzeigen gefunden")
     st.stop()
 
-# Dropdown zum Auswählen des Messwerts
-measurement_choice = st.selectbox("Messwert auswählen", numeric_candidates, index=0)
+# Get the original column names for display
+column_mapping = measurements.attrs.get('column_mapping', {})
+# Create display names by reversing the mapping
+display_names = {cleaned: column_mapping.get(cleaned, cleaned) for cleaned in numeric_candidates}
+
+# Dropdown zum Auswählen des Messwerts (show original names)
+measurement_choice_display = st.selectbox(
+    "Messwert auswählen", 
+    options=list(display_names.values()),
+    index=0
+)
+
+# Get the cleaned column name from the display name
+measurement_choice = [k for k, v in display_names.items() if v == measurement_choice_display][0]
 
 # Load limit values and check if selected measurement has a limit
 try:
     limit_values = get_limit_values()
-    limit_row = limit_values[limit_values["Messwert"] == measurement_choice]
+    limit_row = limit_values[limit_values["Messwert_cleaned"] == measurement_choice]
     
     if not limit_row.empty:
         limit = limit_row.iloc[0]["Grenzwert"]
@@ -329,7 +373,8 @@ try:
         # Display limit information
         col1, col2, col3 = st.columns(3)
         with col1:
-            unit = extract_unit(measurement_choice)
+            # Extract unit from the original column name
+            unit = extract_unit(measurement_choice_display)
             st.metric("Grenzwert", f"{format_limit_value(limit)} {unit}" if unit else format_limit_value(limit))
         with col2:
             st.metric("CAS-Nr.", cas_nr if pd.notna(cas_nr) and cas_nr != "" else "N/A")
@@ -350,8 +395,8 @@ try:
                 color_display = "🔴 Rot (Grenzwert erreicht/überschritten)"
                 background_color = "#FF0000"
             
-            unit = extract_unit(measurement_choice)
-            value_display = f"{format_value_with_unit(latest_value, measurement_choice)} {unit}" if unit else format_value_with_unit(latest_value, measurement_choice)
+            unit = extract_unit(measurement_choice_display)
+            value_display = f"{format_value_with_unit(latest_value, measurement_choice_display)} {unit}" if unit else format_value_with_unit(latest_value, measurement_choice_display)
             st.markdown(f"**Neuester Messwert: {value_display} | Status: {color_display}**")
     else:
         st.info(f"Keine Grenzwerte für '{measurement_choice}' definiert")
@@ -370,14 +415,20 @@ if filtered[measurement_choice].notna().sum() == 0:
 
 # Create a display column for the selected measurement
 filtered[f"{measurement_choice}_display"] = filtered[measurement_choice].apply(
-    lambda x: format_value_with_unit(x, measurement_choice)
+    lambda x: format_value_with_unit(x, measurement_choice_display)
 )
+
+# Create a cleaned Bemerkung column that shows "N/A" instead of null
+if "Bemerkung" in filtered.columns:
+    filtered["Bemerkung_display"] = filtered["Bemerkung"].apply(
+        lambda x: x if pd.notna(x) and str(x).strip() != "" else "N/A"
+    )
 
 # Add limit and status information to tooltip if limit exists
 limit = None
 try:
     limit_values = get_limit_values()
-    limit_row = limit_values[limit_values["Messwert"] == measurement_choice]
+    limit_row = limit_values[limit_values["Messwert_cleaned"] == measurement_choice]
     if not limit_row.empty:
         limit = limit_row.iloc[0]["Grenzwert"]
 except Exception:
@@ -385,7 +436,7 @@ except Exception:
 
 if limit is not None:
     # Create columns for limit display and status
-    unit = extract_unit(measurement_choice)
+    unit = extract_unit(measurement_choice_display)
     filtered["Grenzwert"] = f"{format_limit_value(limit)} {unit}".strip() if unit else format_limit_value(limit)
     
     # Create status column
@@ -400,27 +451,56 @@ if limit is not None:
     
     filtered["Status"] = filtered[measurement_choice].apply(get_status_display)
     
+    # Create tooltip list based on measurement type
+    # For Sichttiefe, add Bemerkung column
+    tooltip_list = [
+        alt.Tooltip("Zeit:T", title="Zeit"), 
+        alt.Tooltip("Uhrzeit:N", title="Uhrzeit"),
+        alt.Tooltip(f"{measurement_choice}_display:N", title=measurement_choice_display)
+    ]
+    
+    # Check if this is Sichttiefe (cleaned name would be "Sichttiefe_m")
+    if "Sichttiefe" in measurement_choice and "Bemerkung_display" in filtered.columns:
+        tooltip_list.append(alt.Tooltip("Bemerkung_display:N", title="Bemerkung"))
+    
+    tooltip_list.extend([
+        alt.Tooltip("Grenzwert:N", title="Grenzwert"), 
+        alt.Tooltip("Status:N", title="Status")
+    ])
+    
     # Create main chart with primary X-axis (Zeit) and Y-axis (measurement values)
+    # Now using cleaned column names without special characters
     chart = (
         alt.Chart(filtered)
-        .mark_line(point=True, tooltip=True)
+        .mark_line(point=True)
         .encode(
             x=alt.X("Zeit:T", title="Zeit"),
-            y=alt.Y(f"{measurement_choice}:Q", title=measurement_choice.strip()),
-            tooltip=["Zeit:T", "Uhrzeit:N", alt.Tooltip(f"{measurement_choice}_display:N", title=measurement_choice.strip()), 
-                     alt.Tooltip("Grenzwert:N", title="Grenzwert"), 
-                     alt.Tooltip("Status:N", title="Status")]
+            y=alt.Y(f"{measurement_choice}:Q", title=measurement_choice_display),
+            tooltip=tooltip_list
         )
     )
 else:
+    # Create tooltip list based on measurement type
+    # For Sichttiefe, add Bemerkung column
+    tooltip_list = [
+        alt.Tooltip("Zeit:T", title="Zeit"), 
+        alt.Tooltip("Uhrzeit:N", title="Uhrzeit"),
+        alt.Tooltip(f"{measurement_choice}_display:N", title=measurement_choice_display)
+    ]
+    
+    # Check if this is Sichttiefe (cleaned name would be "Sichttiefe_m")
+    if "Sichttiefe" in measurement_choice and "Bemerkung_display" in filtered.columns:
+        tooltip_list.append(alt.Tooltip("Bemerkung_display:N", title="Bemerkung"))
+    
     # Create main chart without limit/status if no limit defined
+    # Now using cleaned column names without special characters
     chart = (
         alt.Chart(filtered)
-        .mark_line(point=True, tooltip=True)
+        .mark_line(point=True)
         .encode(
             x=alt.X("Zeit:T", title="Zeit"),
-            y=alt.Y(f"{measurement_choice}:Q", title=measurement_choice.strip()),
-            tooltip=["Zeit:T", "Uhrzeit:N", alt.Tooltip(f"{measurement_choice}_display:N", title=measurement_choice.strip())]
+            y=alt.Y(f"{measurement_choice}:Q", title=measurement_choice_display),
+            tooltip=tooltip_list
         )
     )
 
