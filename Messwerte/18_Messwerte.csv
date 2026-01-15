@@ -1,2 +1,2 @@
 Nummer;Längengrad;Breitengrad;Name;Quelle;Gewässer;Tag;Uhrzeit;Temperatur Wasser [°C];Temperatur Luft [°C];Sichttiefe [m];Bemerkung;Leitfähigkeit [µS/cm];Sauerstoff O2 [mg/l];Sauerstoffsättigung O2 [%];pH Wert;Ammoniak NH3 [mg/l];Ammoniak NH3 [%];Ammonium NH4 [mg/l];Ammonium-N [mg/l];Nitrit NO2 [mg/l];Nitrit-N [mg/l];Nitrat NO3 [mg/l];Nitrat-N [mg/l];Phosphat ortho PO4 [mg/l];Strömungsgeschwindigkeit [m/s];Biochemische Sauerstoffbedarf [mg/l];Biochemische Sauerstoffbedarf Rest Sauerstoff [%];Säure- Bindungsvermögen [mmol/l];Gesamthärte [mmol/l];Gesamthärte [°dH]
-18;53.866260;10.680470;Holstentorbrücke;TEST-Station;Trave
+18;53.866260;10.680470;Holstentorbrücke;TEST-Station;Trave;;;;;;;;;;;;;;;;;;;;;;;;;
