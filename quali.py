@@ -196,6 +196,9 @@ st.write(
     \\
     H2OHL ist immer noch WIP! \\
     \\
+    Die Grenzwertanzeige hat noch **KEINE** Aussagekraft, da die\\
+    tatsächlichen Werte noch nicht recherchiert und eingefügt wurden!\\
+    \\
     \\
     \\
     Datenquellen: \\
