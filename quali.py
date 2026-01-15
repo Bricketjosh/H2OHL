@@ -194,8 +194,9 @@ st.write(
     \\
     \\
     \\
-    Im Rahmen des NUtzens von OpenData, stellen wir die hier verwendeten Daten zur Verfügung. In der oberen rechten Ecke\\
-    des Diagrams kann man zwischen Diagram- und Tabellenansicht umschalten und dort auch die dort angezeigten Daten herunterladen.
+    Im Rahmen des NUtzens von OpenData, stellen wir die hier verwendeten Daten zur Verfügung.\\ 
+    In der oberen rechten Ecke des Diagrams kann man zwischen Diagram- und Tabellenansicht\\
+    umschalten und dort auch die dort angezeigten Daten herunterladen.\\
     \\
     \\
     Beteiligte Studenten: Joshua S. & Alisa R. \\
