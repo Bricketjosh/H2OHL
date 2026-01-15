@@ -1,2 +1,7 @@
-﻿Tag;Uhrzeit;Temp_Wasser;Temp_Luft;Sichttiefe_m;Leitfähigkeit_µS/cm;SauerstoffO2_mg/l;Sättigung_%;pHWert;AmmoniakNH₃_mg/L;Ammoniak_%;Ammonium_NH4_mg/L;Ammonium-N_mg/L;Nitrit_NO2_mg/L;Nitrit-N_mg/L;Nitrat_NO3_mg/L;Nitrat-N_mg/L;Phosphat_ortho_PO4
-21.03.25;00:00:00;9;13;0,2;739;7,7;66,7;7,8;0,003;0;0,269;0,209;0,058;0,018;10,6;2,39;0,34
+﻿Nummer;Breitengrad;Längengrad;Name;Quelle;Gewässer;Tag;Uhrzeit;Temp_Wasser;Temp_Luft;Sichttiefe_m;Leitfähigkeit_µS/cm;SauerstoffO2_mg/l;Sättigung_%;pHWert;AmmoniakNH₃_mg/L;Ammoniak_%;Ammonium_NH4_mg/L;Ammonium-N_mg/L;Nitrit_NO2_mg/L;Nitrit-N_mg/L;Nitrat_NO3_mg/L;Nitrat-N_mg/L;Phosphat_ortho_PO4
+1;53.810812;10.763251;Grönau;Wakenitz_Gruppe;Wakenitz;21.03.25;00:00:00;9;13;0,2;739;7,7;66,7;7,8;0,003;0;0,269;0,209;0,058;0,018;10,6;2,39;0,34
+1;53.810812;10.763251;Grönau;Wakenitz_Gruppe;Wakenitz;24.04.25;14:55:00;14,7;15;0,2;752;13,3;131,6;8;0,003;0;0,134;0,104;0,077;0,023;4,68;1,06;0,29
+1;53.810812;10.763251;Grönau;Wakenitz_Gruppe;Wakenitz;24.06.25;13:05:00;15;18;0,2;664;6,62;60,2;7,7;0,002;0;0,165;0,128;0,086;0,026;3,19;0,72;2,55
+1;53.810812;10.763251;Grönau;Wakenitz_Gruppe;Wakenitz;29.07.25;09:00:00;;18;0,6;728;6,23;62,2;7,8;0,001;0;0,186;0,144;0,148;0,045;3,7;0,84;0,77
+1;53.810812;10.763251;Grönau;Wakenitz_Gruppe;Wakenitz;18.08.25;14:00:00;16,5;20;0,5;772;7,6;76,6;8,1;0,006;0;0,169;0,131;0,103;0,031;3,15;0,71;0,54
+1;53.810812;10.763251;Grönau;Wakenitz_Gruppe;Wakenitz;12.09.25;08:30:00;13,3;10;0,4;629;6,6;63,6;7,7;0;0;;0;0,055;0,017;2,98;0,67;0,29
