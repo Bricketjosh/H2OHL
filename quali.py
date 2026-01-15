@@ -209,8 +209,6 @@ st.write(
 st.markdown(
     """<p style='color: red;'>
     <strong>H2OHL ist immer noch WIP!</strong><br><br>
-    Die Grenzwertanzeige hat noch <strong>KEINE</strong> Aussagekraft, da die<br>
-    tatsächlichen Werte noch nicht recherchiert und eingefügt wurden!
     </p>""",
     unsafe_allow_html=True
 )
@@ -378,6 +376,10 @@ try:
         cas_nr = limit_row.iloc[0]["CAS-Nr"]
         
         # Display limit information
+        st.write("")
+        st.write("")
+        st.subheader("Grenzwerte")
+        st.info("💡 Die Grenzwertanzeige hat noch KEINE Aussagekraft, da die tatsächlichen Werte noch nicht recherchiert und eingefügt wurden!.")
         col1, col2, col3 = st.columns(3)
         with col1:
             # Extract unit from the original column name
@@ -386,35 +388,7 @@ try:
         with col2:
             st.metric("CAS-Nr.", cas_nr if pd.notna(cas_nr) and cas_nr != "" else "N/A")
         with col3:
-            # Download button for the raw CSV file
-            try:
-                csv_url = f"https://raw.githubusercontent.com/Bricketjosh/H2OHL/main/Messwerte/{number}_Messwerte.csv"
-                csv_data = pd.read_csv(csv_url, sep=";", decimal=",")
-                csv_string = csv_data.to_csv(index=False, sep=";", decimal=",")
-                st.download_button(
-                    label="📥 CSV Download - Alle Messpunktwerte",
-                    data=csv_string,
-                    file_name=f"Station_{number}_Messwerte.csv",
-                    mime="text/csv",
-                    help="Komplette CSV-Datei herunterladen"
-                )
-                
-                # Download button for filtered CSV (selected time range)
-                csv_data_filtered = csv_data.copy()
-                csv_data_filtered['Tag'] = pd.to_datetime(csv_data_filtered['Tag'], dayfirst=True)
-                mask_download = (csv_data_filtered['Tag'] >= start_ts) & (csv_data_filtered['Tag'] <= end_ts)
-                csv_data_filtered = csv_data_filtered[mask_download]
-                csv_data_filtered['Tag'] = csv_data_filtered['Tag'].dt.strftime('%d-%m-%y')
-                csv_string_filtered = csv_data_filtered.to_csv(index=False, sep=";", decimal=",")
-                st.download_button(
-                    label="📥 CSV Download - Messpunktwerte des Zeitraums",
-                    data=csv_string_filtered,
-                    file_name=f"Station_{number}_Messwerte_{start_ts.strftime('%Y%m%d')}-{end_ts.strftime('%Y%m%d')}.csv",
-                    mime="text/csv",
-                    help=f"CSV-Datei für Zeitraum {start_ts.strftime('%d.%m.%Y')} - {end_ts.strftime('%d.%m.%Y')}"
-                )
-            except Exception:
-                st.write("")  # Leerer Platz wenn Download fehlschlägt
+            st.write("")  # Platzhalter für symmetrisches Layout
         
         # Get the latest measurement value and show its status
         if measurement_choice in filtered.columns and not filtered.empty:
@@ -437,39 +411,13 @@ try:
             st.markdown(f"**Neuester Messwert: {value_display} | Status: {color_display}**")
     else:
         st.info(f"Keine Grenzwerte für '{measurement_choice}' definiert")
-        # Download buttons even when no limit values exist
-        try:
-            csv_url = f"https://raw.githubusercontent.com/Bricketjosh/H2OHL/main/Messwerte/{number}_Messwerte.csv"
-            csv_data = pd.read_csv(csv_url, sep=";", decimal=",")
-            csv_string = csv_data.to_csv(index=False, sep=";", decimal=",")
-            st.download_button(
-                label="📥 CSV Download - Alle Messpunktwerte",
-                data=csv_string,
-                file_name=f"Station_{number}_Messwerte.csv",
-                mime="text/csv",
-                help="Komplette CSV-Datei herunterladen"
-            )
-            
-            # Download button for filtered CSV (selected time range)
-            csv_data_filtered = csv_data.copy()
-            csv_data_filtered['Tag'] = pd.to_datetime(csv_data_filtered['Tag'], dayfirst=True)
-            mask_download = (csv_data_filtered['Tag'] >= start_ts) & (csv_data_filtered['Tag'] <= end_ts)
-            csv_data_filtered = csv_data_filtered[mask_download]
-            csv_data_filtered['Tag'] = csv_data_filtered['Tag'].dt.strftime('%d-%m-%y')
-            csv_string_filtered = csv_data_filtered.to_csv(index=False, sep=";", decimal=",")
-            st.download_button(
-                label="📥 CSV Download - Messpunktwerte des Zeitraums",
-                data=csv_string_filtered,
-                file_name=f"Station_{number}_Messwerte_{start_ts.strftime('%Y%m%d')}-{end_ts.strftime('%Y%m%d')}.csv",
-                mime="text/csv",
-                help=f"CSV-Datei für Zeitraum {start_ts.strftime('%d.%m.%Y')} - {end_ts.strftime('%d.%m.%Y')}"
-            )
-        except Exception:
-            pass
 except Exception as e:
     st.warning(f"Grenzwerte konnten nicht geladen werden: {str(e)}")
 
-# Info box about chart features
+# Chart section with header
+st.write("")
+st.write("")
+st.subheader("Diagramm/Tabelle")
 st.info("💡 Oben rechts in der Ecke des Diagramms kann man zwischen **Diagramm- und Tabellenansicht** wechseln. Außerdem kann man dort auch beides im **Fullscreen** anzeigen lassen.")
 
 # Ensure the selected column exists in 'filtered' (might be empty) — if not present
@@ -574,3 +522,86 @@ else:
     )
 
 st.altair_chart(chart, use_container_width=True)
+
+# Downloads section
+st.write("")
+st.write("")
+st.subheader("Downloads")
+st.info("💡 Bitte die Tooltips beachten, die erscheinen, wenn man mit der Maus über die Knöpfe fährt.")
+
+# Download buttons for CSV files
+try:
+    csv_url = f"https://raw.githubusercontent.com/Bricketjosh/H2OHL/main/Messwerte/{number}_Messwerte.csv"
+    csv_data = pd.read_csv(csv_url, sep=";", decimal=",")
+    csv_string = csv_data.to_csv(index=False, sep=";", decimal=",")
+    st.download_button(
+        label="📥 CSV Download - Alle Messpunktwerte",
+        data=csv_string,
+        file_name=f"Station_{number}_Messwerte.csv",
+        mime="text/csv",
+        help="Komplette CSV-Datei herunterladen"
+    )
+    
+    # Download button for filtered CSV (selected time range)
+    csv_data_filtered = csv_data.copy()
+    csv_data_filtered['Tag'] = pd.to_datetime(csv_data_filtered['Tag'], dayfirst=True)
+    mask_download = (csv_data_filtered['Tag'] >= start_ts) & (csv_data_filtered['Tag'] <= end_ts)
+    csv_data_filtered = csv_data_filtered[mask_download]
+    csv_data_filtered['Tag'] = csv_data_filtered['Tag'].dt.strftime('%d-%m-%y')
+    csv_string_filtered = csv_data_filtered.to_csv(index=False, sep=";", decimal=",")
+    st.download_button(
+        label="📥 CSV Download - Messpunktwerte des Zeitraums",
+        data=csv_string_filtered,
+        file_name=f"Station_{number}_Messwerte_{start_ts.strftime('%Y%m%d')}-{end_ts.strftime('%Y%m%d')}.csv",
+        mime="text/csv",
+        help=f"CSV-Datei für Zeitraum {start_ts.strftime('%d.%m.%Y')} - {end_ts.strftime('%d.%m.%Y')}"
+    )
+except Exception:
+    pass
+
+# Download button for the chart
+try:
+    # Create a higher resolution version for export
+    chart_export = chart.properties(
+        width=1200,
+        height=600,
+        title={
+            "text": f"Station {number} - {measurement_choice_display}",
+            "subtitle": f"Zeitraum: {start_ts.strftime('%d.%m.%Y')} - {end_ts.strftime('%d.%m.%Y')}"
+        }
+    ).configure_axis(
+        labelFontSize=14,
+        titleFontSize=16
+    ).configure_title(
+        fontSize=18,
+        subtitleFontSize=14
+    )
+    
+    # Export as HTML with embedded Vega-Lite spec (can be opened in browser and saved as image)
+    html_string = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+    </head>
+    <body>
+        <div id="vis"></div>
+        <script type="text/javascript">
+            vegaEmbed('#vis', {chart_export.to_json()}, {{"actions": {{"export": true, "source": false, "editor": false}}}});
+        </script>
+    </body>
+    </html>
+    """
+    
+    st.download_button(
+        label="📊 Diagramm als HTML herunterladen",
+        data=html_string,
+        file_name=f"Station_{number}_{measurement_choice}_{start_ts.strftime('%Y%m%d')}-{end_ts.strftime('%Y%m%d')}.html",
+        mime="text/html",
+        help="Diagramm als HTML herunterladen - öffnen Sie die Datei im Browser und nutzen Sie das ⋮-Menü rechts oben im Diagramm zum Export als PNG/SVG"
+    )
+except Exception as e:
+    st.warning(f"Diagramm-Download konnte nicht erstellt werden: {str(e)}")
+
