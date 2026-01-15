@@ -160,13 +160,7 @@ st.write(
         WIP! [Lübecker Kreisverband der Sportfischer e.V.] (www.angeln-in-luebeck.de) \\
         Datenherausgeber: [Günter Werner / Thomas Kramp] \\
         \\
-        WIP! [Labor Prof. Dr. Külls] (Homepage einfügen) \\
-        Datenherausgeber: [Einfügen] \\
-        \\
         WIP! [Labor Prof. Dr. Heymann] (Homepage einfügen) \\
-        Datenherausgeber: [Einfügen] \\
-        \\
-        WIP! [Entsorgungsbetriebe Lübeck - Klärwerke] (Homepage einfügen) \\
         Datenherausgeber: [Einfügen] \\
         \\
     Datenlizenz: (Einfügen)"""  # noqa: E501
@@ -243,10 +237,16 @@ except Exception:
     st.stop()
 
 try:
+    # Ermittele verfügbare Jahre aus den Messdaten
+    available_years = sorted(measurements.index.year.unique(), reverse=True)
+    
+    # Erstelle die Dropdown-Optionen: feste Optionen + dynamische Jahre
+    time_options = ["Gesamtzeitraum", "Letzte 365 Tage"] + [str(year) for year in available_years] + ["Benutzerdefiniert"]
+    
     # Dropdown für Zeitraum-Auswahl
     time_option = st.selectbox(
         "Zeitraum auswählen",
-        ["Gesamtzeitraum", "Letzte 365 Tage", "2025", "2024", "2023", "2022", "Benutzerdefiniert"]
+        time_options
     )
     
     end = datetime.datetime.today()
@@ -257,20 +257,17 @@ try:
         end = measurements.index.max().to_pydatetime()
     elif time_option == "Letzte 365 Tage":
         start = end - datetime.timedelta(days=365)
-    elif time_option == "2025":
-        start = datetime.datetime(2025, 1, 1)
-        end = datetime.datetime(2025, 12, 31)
-    elif time_option == "2024":
-        start = datetime.datetime(2024, 1, 1)
-        end = datetime.datetime(2024, 12, 31)
-    elif time_option == "2023":
-        start = datetime.datetime(2023, 1, 1)
-        end = datetime.datetime(2023, 12, 31)
-    elif time_option == "2022":
-        start = datetime.datetime(2022, 1, 1)
-        end = datetime.datetime(2022, 12, 31)
-    else:  # Benutzerdefiniert
+    elif time_option == "Benutzerdefiniert":
         start, end = st.date_input("Zeitraum", (end - datetime.timedelta(days=365), end), format="DD.MM.YYYY")
+    else:
+        # Es handelt sich um eine Jahresauswahl
+        try:
+            selected_year = int(time_option)
+            start = datetime.datetime(selected_year, 1, 1)
+            end = datetime.datetime(selected_year, 12, 31)
+        except ValueError:
+            st.error(f"Ungültiges Jahr: {time_option}")
+            st.stop()
         
 except Exception:
     st.info("Bitte Zeitraum wählen")
@@ -298,7 +295,7 @@ if "Tag" in filtered.columns:
 
 # Build a list of numeric measurement columns we can plot.
 # Exclude columns that are not measurement values.
-exclude_cols = {"Nummer", "Breitengrad", "Längengrad", "Quelle", "Gewässer"}
+exclude_cols = {"Nummer", "Breitengrad", "Längengrad", "Quelle", "Gewässer", "Bemerkung"}
 numeric_candidates = [
     c for c in measurements.select_dtypes(include="number").columns if c not in exclude_cols
 ]
