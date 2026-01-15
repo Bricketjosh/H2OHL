@@ -194,7 +194,7 @@ st.write(
     \\
     Beteiligte Studenten: Joshua S. & Alisa R. \\
     \\
-    H2OHL ist immer noch WIP! \\
+    **H2OHL ist immer noch WIP!** \\
     \\
     Die Grenzwertanzeige hat noch **KEINE** Aussagekraft, da die\\
     tatsächlichen Werte noch nicht recherchiert und eingefügt wurden!\\
