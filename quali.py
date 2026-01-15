@@ -8,7 +8,6 @@ import streamlit as st
 from streamlit_folium import st_folium
 
 
-@st.cache_data
 def get_limit_values():
     # Load limit values (Grenzwerte) from CSV
     df = pd.read_csv(
@@ -16,15 +15,27 @@ def get_limit_values():
         sep=";",
         decimal=",",
     )
+    # Strip whitespace from column names and values
+    df.columns = df.columns.str.strip()
+    if "Messwert" in df.columns:
+        df["Messwert"] = df["Messwert"].str.strip()
     return df
 
 
 def extract_unit(column_name):
     """
     Extract unit from column name with proper formatting.
-    E.g., 'Temp_Wasser' -> '°C', 'Leitfähigkeit_µS/cm' -> 'µS/cm', 'Ammoniak_%' -> '%'
-    Returns the text after the last underscore with corrections for specific cases.
+    Supports both formats:
+    - Bracket format: 'Temperatur Wasser [°C]' -> '°C'
+    - Underscore format: 'Temp_Wasser_°C' -> '°C'
     """
+    # First, try to extract from bracket format: [unit]
+    import re
+    bracket_match = re.search(r'\[([^\]]+)\]', column_name)
+    if bracket_match:
+        return bracket_match.group(1)
+    
+    # Fall back to underscore format
     if '_' in column_name:
         unit = column_name.split('_', 1)[1]  # Get everything after first underscore
         
@@ -47,8 +58,8 @@ def extract_unit(column_name):
 
 def format_value_with_unit(value, column_name):
     """
-    Format value to match CSV display format and add unit.
-    E.g., (13.30000, 'Temp_Wasser') becomes '13,3 °C'
+    Format value to match CSV display format.
+    E.g., 13.30000 becomes '13,3'
     """
     if pd.isna(value):
         return "N/A"
@@ -57,10 +68,6 @@ def format_value_with_unit(value, column_name):
     formatted = f"{value:.5f}".rstrip('0').rstrip('.')
     formatted = formatted.replace('.', ',')
     
-    # Add unit
-    unit = extract_unit(column_name)
-    if unit:
-        return f"{formatted} {unit}"
     return formatted
 
 
@@ -115,6 +122,9 @@ def get_measurements(number):
         sep=";",
         decimal=",",
     )
+    
+    # Strip whitespace from column names
+    df.columns = df.columns.str.strip()
 
     # Tag column is in DD-MM-YY format in the CSV; ensure correct parsing
     df["Tag"] = pd.to_datetime(df["Tag"], dayfirst=True)
@@ -319,7 +329,8 @@ try:
         # Display limit information
         col1, col2, col3 = st.columns(3)
         with col1:
-            st.metric("Grenzwert", f"{format_limit_value(limit)} {extract_unit(measurement_choice)}")
+            unit = extract_unit(measurement_choice)
+            st.metric("Grenzwert", f"{format_limit_value(limit)} {unit}" if unit else format_limit_value(limit))
         with col2:
             st.metric("CAS-Nr.", cas_nr if pd.notna(cas_nr) and cas_nr != "" else "N/A")
         
@@ -339,7 +350,9 @@ try:
                 color_display = "🔴 Rot (Grenzwert erreicht/überschritten)"
                 background_color = "#FF0000"
             
-            st.markdown(f"**Neuester Messwert: {format_value_with_unit(latest_value, measurement_choice)} | Status: {color_display}**")
+            unit = extract_unit(measurement_choice)
+            value_display = f"{format_value_with_unit(latest_value, measurement_choice)} {unit}" if unit else format_value_with_unit(latest_value, measurement_choice)
+            st.markdown(f"**Neuester Messwert: {value_display} | Status: {color_display}**")
     else:
         st.info(f"Keine Grenzwerte für '{measurement_choice}' definiert")
 except Exception as e:
@@ -350,8 +363,12 @@ except Exception as e:
 if measurement_choice not in filtered.columns:
     filtered[measurement_choice] = pd.Series(dtype="float64")
 
-# Create a display column with unit information for the selected measurement
-unit = extract_unit(measurement_choice)
+# Check if there are any non-null values to plot
+if filtered[measurement_choice].notna().sum() == 0:
+    st.warning(f"⚠️ Keine Daten für '{measurement_choice}' im gewählten Zeitraum vorhanden.")
+    st.stop()
+
+# Create a display column for the selected measurement
 filtered[f"{measurement_choice}_display"] = filtered[measurement_choice].apply(
     lambda x: format_value_with_unit(x, measurement_choice)
 )
@@ -368,7 +385,8 @@ except Exception:
 
 if limit is not None:
     # Create columns for limit display and status
-    filtered["Grenzwert"] = f"{format_limit_value(limit)} {unit}".strip()
+    unit = extract_unit(measurement_choice)
+    filtered["Grenzwert"] = f"{format_limit_value(limit)} {unit}".strip() if unit else format_limit_value(limit)
     
     # Create status column
     def get_status_display(value):
@@ -388,8 +406,8 @@ if limit is not None:
         .mark_line(point=True, tooltip=True)
         .encode(
             x=alt.X("Zeit:T", title="Zeit"),
-            y=alt.Y(f"{measurement_choice}:Q", title=f"{measurement_choice} {unit}".strip()),
-            tooltip=["Zeit:T", "Uhrzeit:N", alt.Tooltip(f"{measurement_choice}_display:N", title=measurement_choice), 
+            y=alt.Y(f"{measurement_choice}:Q", title=measurement_choice.strip()),
+            tooltip=["Zeit:T", "Uhrzeit:N", alt.Tooltip(f"{measurement_choice}_display:N", title=measurement_choice.strip()), 
                      alt.Tooltip("Grenzwert:N", title="Grenzwert"), 
                      alt.Tooltip("Status:N", title="Status")]
         )
@@ -401,8 +419,8 @@ else:
         .mark_line(point=True, tooltip=True)
         .encode(
             x=alt.X("Zeit:T", title="Zeit"),
-            y=alt.Y(f"{measurement_choice}:Q", title=f"{measurement_choice} {unit}".strip()),
-            tooltip=["Zeit:T", "Uhrzeit:N", alt.Tooltip(f"{measurement_choice}_display:N", title=measurement_choice)]
+            y=alt.Y(f"{measurement_choice}:Q", title=measurement_choice.strip()),
+            tooltip=["Zeit:T", "Uhrzeit:N", alt.Tooltip(f"{measurement_choice}_display:N", title=measurement_choice.strip())]
         )
     )
 
