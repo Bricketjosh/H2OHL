@@ -182,7 +182,7 @@ def get_measurements(number):
 
 
 st.image("UM_H2OHL_Logo.png", width=200)
-st.title("H20HL - Wasserqualität im Großraum Lübeck")
+st.title("H2OHL - Wasserqualität im Großraum Lübeck")
 
 st.image("logo-thl.jpg", width=100)
 st.write(
@@ -194,21 +194,25 @@ st.write(
     \\
     Beteiligte Studenten: Joshua S. & Alisa R. \\
     \\
-    **H2OHL ist immer noch WIP!** \\
-    \\
-    Die Grenzwertanzeige hat noch **KEINE** Aussagekraft, da die\\
-    tatsächlichen Werte noch nicht recherchiert und eingefügt wurden!\\
-    \\
     \\
     \\
     Datenquellen: \\
-        WIP! [Lübecker Kreisverband der Sportfischer e.V.] (www.angeln-in-luebeck.de) \\
+        [Lübecker Kreisverband der Sportfischer e.V.] (www.angeln-in-luebeck.de) \\
         Datenherausgeber: [Günter Werner / Thomas Kramp] \\
         \\
-        WIP! [Labor Prof. Dr. Heymann] (Homepage einfügen) \\
+        [Labor Prof. Dr. Heymann] (Homepage einfügen) \\
         Datenherausgeber: [Einfügen] \\
         \\
     Datenlizenz: (Einfügen)"""  # noqa: E501
+)
+
+st.markdown(
+    """<p style='color: red;'>
+    <strong>H2OHL ist immer noch WIP!</strong><br><br>
+    Die Grenzwertanzeige hat noch <strong>KEINE</strong> Aussagekraft, da die<br>
+    tatsächlichen Werte noch nicht recherchiert und eingefügt wurden!
+    </p>""",
+    unsafe_allow_html=True
 )
 
 try:
