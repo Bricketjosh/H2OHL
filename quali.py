@@ -9,6 +9,94 @@ from streamlit_folium import st_folium
 
 
 @st.cache_data
+def get_limit_values():
+    # Load limit values (Grenzwerte) from CSV
+    df = pd.read_csv(
+        "https://raw.githubusercontent.com/Bricketjosh/H2OHL/refs/heads/main/Messwerte/Grenzwerte.csv",
+        sep=";",
+        decimal=",",
+    )
+    return df
+
+
+def extract_unit(column_name):
+    """
+    Extract unit from column name with proper formatting.
+    E.g., 'Temp_Wasser' -> '°C', 'Leitfähigkeit_µS/cm' -> 'µS/cm', 'Ammoniak_%' -> '%'
+    Returns the text after the last underscore with corrections for specific cases.
+    """
+    if '_' in column_name:
+        unit = column_name.split('_', 1)[1]  # Get everything after first underscore
+        
+        # Handle temperature columns - just return °C
+        if column_name.startswith('Temp_'):
+            return "°C"
+        
+        # Handle concentration columns - standardize to mg/L
+        if unit.endswith('mg/l'):
+            return "mg/L"
+        if 'mg/L' in unit:
+            # For cases like NH4_mg/L, NO2_mg/L, NO3_mg/L - just return mg/L
+            return "mg/L"
+        if unit == 'ortho_PO4':
+            return "mg/L"
+        
+        return unit
+    return ""
+
+
+def format_value_with_unit(value, column_name):
+    """
+    Format value to match CSV display format and add unit.
+    E.g., (13.30000, 'Temp_Wasser') becomes '13,3 °C'
+    """
+    if pd.isna(value):
+        return "N/A"
+    
+    # Format the numeric value
+    formatted = f"{value:.5f}".rstrip('0').rstrip('.')
+    formatted = formatted.replace('.', ',')
+    
+    # Add unit
+    unit = extract_unit(column_name)
+    if unit:
+        return f"{formatted} {unit}"
+    return formatted
+
+
+def format_limit_value(value):
+    """
+    Format limit value to match CSV display format (remove trailing zeros).
+    E.g., 13.30000 becomes 13,3 (with comma as decimal separator in German format)
+    """
+    if pd.isna(value):
+        return "N/A"
+    
+    # Convert to string with appropriate precision, then remove trailing zeros
+    formatted = f"{value:.5f}".rstrip('0').rstrip('.')
+    # Replace dot with comma for German decimal format
+    formatted = formatted.replace('.', ',')
+    return formatted
+
+
+def get_status_color(value, limit, tolerance=0.05):
+    """
+    Determine status color based on value and limit.
+    Green: value < (limit - tolerance)
+    Yellow: (limit - tolerance) <= value < limit
+    Red: value >= limit
+    Returns: 'green', 'yellow', or 'red'
+    """
+    if pd.isna(value) or pd.isna(limit):
+        return None
+    
+    if value < (limit - tolerance):
+        return "green"
+    elif value < limit:
+        return "yellow"
+    else:
+        return "red"
+@st.cache_data
 def get_stations():
     # parse decimal comma numbers correctly
     df = pd.read_csv(
@@ -222,20 +310,103 @@ if not numeric_candidates:
 # Dropdown zum Auswählen des Messwerts
 measurement_choice = st.selectbox("Messwert auswählen", numeric_candidates, index=0)
 
+# Load limit values and check if selected measurement has a limit
+try:
+    limit_values = get_limit_values()
+    limit_row = limit_values[limit_values["Messwert"] == measurement_choice]
+    
+    if not limit_row.empty:
+        limit = limit_row.iloc[0]["Grenzwert"]
+        cas_nr = limit_row.iloc[0]["CAS-Nr"]
+        
+        # Display limit information
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric("Grenzwert", f"{format_limit_value(limit)} {extract_unit(measurement_choice)}")
+        with col2:
+            st.metric("CAS-Nr.", cas_nr if pd.notna(cas_nr) and cas_nr != "" else "N/A")
+        
+        # Get the latest measurement value and show its status
+        if measurement_choice in filtered.columns and not filtered.empty:
+            latest_value = filtered[measurement_choice].iloc[-1]
+            tolerance = 0.05
+            status_color = get_status_color(latest_value, limit, tolerance)
+            
+            if status_color == "green":
+                color_display = "🟢 Grün (OK)"
+                background_color = "#00FF00"
+            elif status_color == "yellow":
+                color_display = "🟡 Gelb (Warnung)"
+                background_color = "#FFFF00"
+            else:  # red
+                color_display = "🔴 Rot (Grenzwert erreicht/überschritten)"
+                background_color = "#FF0000"
+            
+            st.markdown(f"**Neuester Messwert: {format_value_with_unit(latest_value, measurement_choice)} | Status: {color_display}**")
+    else:
+        st.info(f"Keine Grenzwerte für '{measurement_choice}' definiert")
+except Exception as e:
+    st.warning(f"Grenzwerte konnten nicht geladen werden: {str(e)}")
+
 # Ensure the selected column exists in 'filtered' (might be empty) — if not present
 # try to add it (will produce NaN rows) so the chart is always renderable.
 if measurement_choice not in filtered.columns:
     filtered[measurement_choice] = pd.Series(dtype="float64")
 
-# Create main chart with primary X-axis (Zeit) and Y-axis (measurement values)
-chart = (
-    alt.Chart(filtered)
-    .mark_line(point=True, tooltip=True)
-    .encode(
-        x=alt.X("Zeit:T", title="Zeit"),
-        y=alt.Y(f"{measurement_choice}:Q", title=measurement_choice),
-        tooltip=["Zeit:T", "Uhrzeit:N", f"{measurement_choice}:Q"]
-    )
+# Create a display column with unit information for the selected measurement
+unit = extract_unit(measurement_choice)
+filtered[f"{measurement_choice}_display"] = filtered[measurement_choice].apply(
+    lambda x: format_value_with_unit(x, measurement_choice)
 )
+
+# Add limit and status information to tooltip if limit exists
+limit = None
+try:
+    limit_values = get_limit_values()
+    limit_row = limit_values[limit_values["Messwert"] == measurement_choice]
+    if not limit_row.empty:
+        limit = limit_row.iloc[0]["Grenzwert"]
+except Exception:
+    pass
+
+if limit is not None:
+    # Create columns for limit display and status
+    filtered["Grenzwert"] = f"{format_limit_value(limit)} {unit}".strip()
+    
+    # Create status column
+    def get_status_display(value):
+        status_color = get_status_color(value, limit, tolerance=0.05)
+        if status_color == "green":
+            return "🟢 OK"
+        elif status_color == "yellow":
+            return "🟡 Warnung"
+        else:
+            return "🔴 Grenzwert überschritten"
+    
+    filtered["Status"] = filtered[measurement_choice].apply(get_status_display)
+    
+    # Create main chart with primary X-axis (Zeit) and Y-axis (measurement values)
+    chart = (
+        alt.Chart(filtered)
+        .mark_line(point=True, tooltip=True)
+        .encode(
+            x=alt.X("Zeit:T", title="Zeit"),
+            y=alt.Y(f"{measurement_choice}:Q", title=f"{measurement_choice} {unit}".strip()),
+            tooltip=["Zeit:T", "Uhrzeit:N", alt.Tooltip(f"{measurement_choice}_display:N", title=measurement_choice), 
+                     alt.Tooltip("Grenzwert:N", title="Grenzwert"), 
+                     alt.Tooltip("Status:N", title="Status")]
+        )
+    )
+else:
+    # Create main chart without limit/status if no limit defined
+    chart = (
+        alt.Chart(filtered)
+        .mark_line(point=True, tooltip=True)
+        .encode(
+            x=alt.X("Zeit:T", title="Zeit"),
+            y=alt.Y(f"{measurement_choice}:Q", title=f"{measurement_choice} {unit}".strip()),
+            tooltip=["Zeit:T", "Uhrzeit:N", alt.Tooltip(f"{measurement_choice}_display:N", title=measurement_choice)]
+        )
+    )
 
 st.altair_chart(chart, use_container_width=True)
