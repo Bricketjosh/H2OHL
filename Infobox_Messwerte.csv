@@ -1,1 +1,23 @@
-1
+Messwert;CAS-Nr;Grenzwert;
+Temperatur Wasser [°C];;25;
+Temperatur Luft [°C];;30;
+Sichttiefe [m];;0,5;
+Leitfähigkeit [µS/cm];;500;
+Sauerstoff O2 [mg/l];7782-44-7;6;
+Sauerstoffsättigung O2 [%];7782-44-7;80;
+pH Wert;;8,5;
+Ammoniak NH3 [mg/l];7664-41-7;0,5;
+Ammoniak NH3 [%];7664-41-7;;
+Ammonium NH4 [mg/l];14798-03-9;0,5;
+Ammonium-N [mg/l];14798-03-9;0,5;
+Nitrit NO2 [mg/l];14797-65-0;0,1;
+Nitrit-N [mg/l];14797-65-0;0,03;
+Nitrat NO3 [mg/l];14797-38-3;50;
+Nitrat-N [mg/l];14797-38-3;11,3;
+Phosphat ortho PO4 [mg/l];14265-44-2;0,15;
+Strömungsgeschwindigkeit [m/s];;;
+Biochemische Sauerstoffbedarf [mg/l];;5;
+Biochemische Sauerstoffbedarf Rest Sauerstoff [%];;;
+Säure- Bindungsvermögen [mmol/l];;;
+Gesamthärte [mmol/l];;;
+Gesamthärte [°dH];;;
