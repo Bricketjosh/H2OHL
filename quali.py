@@ -181,10 +181,41 @@ def get_measurements(number):
     return df
 
 
-st.image("UM_H2OHL_Logo.png", width=200)
-st.title("H2OHL - Wasserqualität im Großraum Lübeck")
+# Header with logo and title side by side
+col1, col2 = st.columns([1, 3])
+with col1:
+    st.markdown("""
+    <style>
+    .logo-no-fullscreen {
+        pointer-events: none;
+    }
+    </style>
+    <img src="https://raw.githubusercontent.com/Bricketjosh/H2OHL/refs/heads/main/UM_H2OHL_Logo.png" width="200" class="logo-no-fullscreen">
+    """, unsafe_allow_html=True)
+with col2:
+    st.markdown("<h1 style='margin-top: 0;'>H2OHL - Wasserqualität im Großraum Lübeck</h1>", unsafe_allow_html=True)
 
-st.image("logo-thl.jpg", width=100)
+st.write("")
+st.write("")
+
+# Partner logos in white box with black border
+st.markdown("""
+<div style="background-color: white; border: 2px solid black; padding: 5px 10px; border-radius: 5px; display: flex; align-items: center; justify-content: space-around; gap: 10px;">
+    <a href="https://www.th-luebeck.de/" target="_blank" style="text-decoration: none; flex: 1; display: flex; justify-content: center;">
+        <img src="https://raw.githubusercontent.com/Bricketjosh/H2OHL/refs/heads/main/Logo_TH.svg.png" width="120" style="pointer-events: auto;">
+    </a>
+    <a href="https://www.luebeck.de/de/index.html" target="_blank" style="text-decoration: none; flex: 1; display: flex; justify-content: center;">
+        <img src="https://raw.githubusercontent.com/Bricketjosh/H2OHL/refs/heads/main/Logo_HL.svg" width="175" style="pointer-events: auto;">
+    </a>
+    <a href="https://www.swhl.de/?srsltid=AfmBOoqaZwfb0rqO_kz1y9aCzFmow-wBsqZvHMM13Zp2cpyy06I9_PYW" target="_blank" style="text-decoration: none; flex: 1; display: flex; justify-content: center;">
+        <img src="https://raw.githubusercontent.com/Bricketjosh/H2OHL/refs/heads/main/Logo_SW.webp" width="2000" style="pointer-events: auto;">
+    </a>
+</div>
+""", unsafe_allow_html=True)
+
+st.write("")
+st.write("")
+
 st.write(
     """H2OHL ist ein Studentenprojekt der Technischen Hochschule Lübeck 
     im Rahmen des Moduls Umweltmonitoring (WiSe 2025/26). \\
@@ -194,13 +225,19 @@ st.write(
     \\
     Beteiligte Studenten: Joshua S. & Alisa R. \\
     \\
+    Das Modul Umweltmonitoring (WiSe 2025/26) steht unter Aufsicht von \\
+    Vertretern der Technischen Hochschule Lübeck, der Hansestadt Lübeck und der \\
+    Stadtwerke Lübeck.
     \\
     \\
-    Datenquellen: \\
+    \\
+    \\
+    **Datenquellen:** \\
+    \\
         [Lübecker Kreisverband der Sportfischer e.V.] (www.angeln-in-luebeck.de) \\
         Datenherausgeber: [Günter Werner / Thomas Kramp] \\
         \\
-        [Labor Prof. Dr. Heymann] (Homepage einfügen) \\
+        [Labor Prof. Dr. Heymann] [TH-Lübeck] (Homepage einfügen) \\
         Datenherausgeber: [Einfügen] \\
         \\
     Datenlizenz: (Einfügen)"""  # noqa: E501
@@ -212,6 +249,26 @@ st.markdown(
     </p>""",
     unsafe_allow_html=True
 )
+
+# Horizontal line that changes color based on light/dark mode
+st.markdown("""
+<style>
+.separator-line {
+    border-top: 2px solid;
+    border-color: black;
+    margin: 20px 0;
+}
+
+@media (prefers-color-scheme: dark) {
+    .separator-line {
+        border-color: white;
+    }
+}
+</style>
+<div class="separator-line"></div>
+""", unsafe_allow_html=True)
+
+st.subheader("Interaktive Karte")
 
 try:
     stations = get_stations()
