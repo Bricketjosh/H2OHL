@@ -245,12 +245,51 @@ st.write(
     Datenlizenz: (Einfügen)"""  # noqa: E501
 )
 
+st.write("")
+st.write("")
+
 st.markdown(
     """<p style='color: red;'>
     <strong>H2OHL ist immer noch WIP!</strong><br><br>
     </p>""",
     unsafe_allow_html=True
 )
+
+# Changelog section (collapsible with hierarchical structure: Year > Month > Day)
+with st.expander("📋 Changelog", expanded=False):
+    with st.expander("📅 2026", expanded=False):
+        with st.expander("Januar", expanded=False):
+            with st.expander("16.01.2026", expanded=False):
+                st.markdown("""
+                - Header-Layout überarbeitet: Logo und Titel nebeneinander angeordnet
+                - Partner-Logos in weißer Box mit schwarzem Rahmen hinzugefügt (TH Lübeck, HL, Stadtwerke)
+                - Kontextinformationen-Sektion hinzugefügt (Messwert, CAS-Nr., Grenzwert, Kontextinfo)
+                - Kontextinfo-Darstellung optimiert: Label und Text in separaten Zeilen
+                - Trennlinie (schwarz/weiß) zwischen Header und Karte eingefügt
+                - Info-Tooltips zu Download-Buttons ergänzt
+                - Diagramm-Export als HTML implementiert
+                - Changelog mit hierarchischer Struktur (Jahr → Monat → Tag) erweitert
+                """)
+            
+            with st.expander("15.01.2026", expanded=False):
+                st.markdown("""
+                - WIP-Status-Hinweis farblich hervorgehoben (rot)
+                - CSV-Download-Funktionalität erweitert (Gesamtzeitraum + ausgewählter Zeitraum)
+                - Diagramm-Export-Funktion hinzugefügt
+                - Grenzwert-Handling und Formatierungsfunktionen implementiert
+                - Zeitauswahl-Logik verbessert (Jahresauswahl, benutzerdefiniert)
+                - Textformatierung und Leerzeichen-Handling optimiert
+                - Unit-Extraktion aus Spaltennamen verbessert
+                - OpenData-Nutzungshinweise ergänzt
+                - Tabellenansicht-Tooltip im Diagramm-Bereich hinzugefügt
+                """)
+    
+    st.markdown("""
+    <div style="margin-top: 15px; padding: 10px; background-color: #f0f0f0; border-radius: 5px; font-size: 0.85em; color: black;">
+        <strong>Version:</strong> WiSe 2025/26 (Work in Progress)<br>
+        <strong>Letzte Aktualisierung:</strong> 16.01.2026
+    </div>
+    """, unsafe_allow_html=True)
 
 # Dual color separator bars (black and white)
 st.markdown("""
@@ -610,10 +649,13 @@ try:
             else:
                 st.write("**Grenzwert:** -")
         
+        st.write("")  # Leerzeile zwischen CAS-Nr./Grenzwert und Kontextinfo
+        
         # Third row: Kontextinfo (full width)
         if "Kontextinfo" in infobox_df.columns:
             if pd.notna(row_data.get("Kontextinfo")) and row_data.get("Kontextinfo") != "":
-                st.write(f"**Kontextinfo:** {row_data.get('Kontextinfo')}")
+                st.write("**Kontextinfo:**")
+                st.write(row_data.get('Kontextinfo'))
     else:
         st.info(f"Keine Kontextinformationen für '{measurement_choice_display}' verfügbar.")
 except Exception as e:
