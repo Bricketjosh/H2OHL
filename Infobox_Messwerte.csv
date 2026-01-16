@@ -1,4 +1,4 @@
-Messwert;CAS-Nr;Grenzwert;
+Messwert;CAS-Nr;Grenzwert;Kontextinfo
 Temperatur Wasser [°C];;25;
 Temperatur Luft [°C];;30;
 Sichttiefe [m];;0,5;
