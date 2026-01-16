@@ -418,7 +418,7 @@ except Exception as e:
 st.write("")
 st.write("")
 st.subheader("Diagramm/Tabelle")
-st.info("💡 Oben rechts in der Ecke des Diagramms kann man zwischen **Diagramm- und Tabellenansicht** wechseln. Außerdem kann man dort auch beides im **Fullscreen** anzeigen lassen. Fahre mit der Maus über die Datenpunkte im Graphen, um zusätzliche Inofs in einem Tooltip anzeigen zu lassen.")
+st.info("💡 Oben rechts in der Ecke des Diagramms kann man zwischen **Diagramm- und Tabellenansicht** wechseln. Außerdem kann man dort auch beides im **Fullscreen** anzeigen lassen. Fahre mit der Maus über die Datenpunkte im Graphen, um zusätzliche Infos in einem Tooltip anzeigen zu lassen.")
 
 # Ensure the selected column exists in 'filtered' (might be empty) — if not present
 # try to add it (will produce NaN rows) so the chart is always renderable.
