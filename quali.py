@@ -181,35 +181,37 @@ def get_measurements(number):
     return df
 
 
-# Header with logo and title side by side
-col1, col2 = st.columns([1, 3])
-with col1:
-    st.markdown("""
-    <style>
-    .logo-no-fullscreen {
-        pointer-events: none;
-    }
-    </style>
-    <img src="https://raw.githubusercontent.com/Bricketjosh/H2OHL/refs/heads/main/UM_H2OHL_Logo.png" width="200" class="logo-no-fullscreen">
-    """, unsafe_allow_html=True)
-with col2:
-    st.markdown("<h1 style='margin-top: 0;'>H2OHL - Wasserqualität im Großraum Lübeck</h1>", unsafe_allow_html=True)
-
-st.write("")
-st.write("")
-
-# Partner logos in white box with black border
+# Header with logo and title side by side - fixed width container, left-aligned
 st.markdown("""
-<div style="background-color: white; border: 2px solid black; padding: 5px 10px; border-radius: 5px; display: flex; align-items: center; justify-content: space-around; gap: 10px;">
-    <a href="https://www.th-luebeck.de/" target="_blank" style="text-decoration: none; flex: 1; display: flex; justify-content: center;">
-        <img src="https://raw.githubusercontent.com/Bricketjosh/H2OHL/refs/heads/main/Logo_TH.svg.png" width="120" style="pointer-events: auto;">
-    </a>
-    <a href="https://www.luebeck.de/de/index.html" target="_blank" style="text-decoration: none; flex: 1; display: flex; justify-content: center;">
-        <img src="https://raw.githubusercontent.com/Bricketjosh/H2OHL/refs/heads/main/Logo_HL.svg" width="175" style="pointer-events: auto;">
-    </a>
-    <a href="https://www.swhl.de/?srsltid=AfmBOoqaZwfb0rqO_kz1y9aCzFmow-wBsqZvHMM13Zp2cpyy06I9_PYW" target="_blank" style="text-decoration: none; flex: 1; display: flex; justify-content: center;">
-        <img src="https://raw.githubusercontent.com/Bricketjosh/H2OHL/refs/heads/main/Logo_SW.webp" width="2000" style="pointer-events: auto;">
-    </a>
+<div style="max-width: 1000px; margin: 0;">
+    <div style="display: flex; align-items: flex-start; gap: 20px;">
+        <div style="flex-shrink: 0;">
+            <img src="https://raw.githubusercontent.com/Bricketjosh/H2OHL/refs/heads/main/UM_H2OHL_Logo.png" width="200" style="pointer-events: none; display: block;">
+        </div>
+        <div style="flex: 1;">
+            <h1 style="margin-top: 0; margin-bottom: 0;">H2OHL - Wasserqualität im Großraum Lübeck</h1>
+        </div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+st.write("")
+st.write("")
+
+# Partner logos in white box with black border - fixed width container, left-aligned
+st.markdown("""
+<div style="max-width: 900px; margin: 0;">
+    <div style="background-color: white; border: 2px solid black; padding: 5px 10px; border-radius: 5px; display: flex; align-items: center; justify-content: space-around; gap: 10px;">
+        <a href="https://www.th-luebeck.de/" target="_blank" style="text-decoration: none; flex: 0 0 120px; display: flex; justify-content: center;">
+            <img src="https://raw.githubusercontent.com/Bricketjosh/H2OHL/refs/heads/main/Logo_TH.svg.png" width="120" style="pointer-events: auto; display: block;">
+        </a>
+        <a href="https://www.luebeck.de/de/index.html" target="_blank" style="text-decoration: none; flex: 0 0 175px; display: flex; justify-content: center;">
+            <img src="https://raw.githubusercontent.com/Bricketjosh/H2OHL/refs/heads/main/Logo_HL.svg" width="175" style="pointer-events: auto; display: block;">
+        </a>
+        <a href="https://www.swhl.de/?srsltid=AfmBOoqaZwfb0rqO_kz1y9aCzFmow-wBsqZvHMM13Zp2cpyy06I9_PYW" target="_blank" style="text-decoration: none; flex: 0 0 120px; display: flex; justify-content: center;">
+            <img src="https://raw.githubusercontent.com/Bricketjosh/H2OHL/refs/heads/main/Logo_SW.webp" width="120" style="pointer-events: auto; display: block;">
+        </a>
+    </div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -250,22 +252,12 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# Horizontal line that changes color based on light/dark mode
+# Dual color separator bars (black and white)
 st.markdown("""
-<style>
-.separator-line {
-    border-top: 2px solid;
-    border-color: black;
-    margin: 20px 0;
-}
-
-@media (prefers-color-scheme: dark) {
-    .separator-line {
-        border-color: white;
-    }
-}
-</style>
-<div class="separator-line"></div>
+<div style="display: flex; flex-direction: column; margin: 20px 0;">
+    <div style="height: 2px; background-color: black;"></div>
+    <div style="height: 2px; background-color: white;"></div>
+</div>
 """, unsafe_allow_html=True)
 
 st.subheader("Interaktive Karte")
@@ -579,6 +571,53 @@ else:
     )
 
 st.altair_chart(chart, use_container_width=True)
+
+# Context information section
+st.write("")
+st.write("")
+st.subheader("Kontextinformationen")
+
+# Load infobox data
+try:
+    infobox_df = pd.read_csv(
+        "https://raw.githubusercontent.com/Bricketjosh/H2OHL/refs/heads/main/Infobox_Messwerte.csv",
+        sep=";",
+        decimal=",",
+    )
+    infobox_df.columns = infobox_df.columns.str.strip()
+    
+    # Find matching row for selected measurement
+    matching_row = infobox_df[infobox_df["Messwert"] == measurement_choice_display]
+    
+    if not matching_row.empty:
+        row_data = matching_row.iloc[0]
+        
+        # First row: Messwert (full width)
+        st.write(f"**Messwert:** {measurement_choice_display}")
+        
+        # Second row: CAS-Nr and Grenzwert in columns
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            if pd.notna(row_data.get("CAS-Nr")) and row_data.get("CAS-Nr") != "":
+                st.write(f"**CAS-Nr:** {row_data.get('CAS-Nr')}")
+            else:
+                st.write("**CAS-Nr:** -")
+        
+        with col2:
+            if pd.notna(row_data.get("Grenzwert")) and row_data.get("Grenzwert") != "":
+                st.write(f"**Grenzwert:** {row_data.get('Grenzwert')}")
+            else:
+                st.write("**Grenzwert:** -")
+        
+        # Third row: Kontextinfo (full width)
+        if "Kontextinfo" in infobox_df.columns:
+            if pd.notna(row_data.get("Kontextinfo")) and row_data.get("Kontextinfo") != "":
+                st.write(f"**Kontextinfo:** {row_data.get('Kontextinfo')}")
+    else:
+        st.info(f"Keine Kontextinformationen für '{measurement_choice_display}' verfügbar.")
+except Exception as e:
+    st.warning(f"Kontextinformationen konnten nicht geladen werden: {str(e)}")
 
 # Downloads section
 st.write("")
