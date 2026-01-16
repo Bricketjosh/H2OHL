@@ -1,23 +1,23 @@
 Messwert;CAS-Nr;Grenzwert;Kontextinfo
-Temperatur Wasser [°C];;25; TEST TEST TEST TEST TEST TEST 123 123 123 123 123 123
-Temperatur Luft [°C];;30;
-Sichttiefe [m];;0,5;
-Leitfähigkeit [µS/cm];;500;
-Sauerstoff O2 [mg/l];7782-44-7;6;
-Sauerstoffsättigung O2 [%];7782-44-7;80;
-pH Wert;;8,5;
-Ammoniak NH3 [mg/l];7664-41-7;0,5;
-Ammoniak NH3 [%];7664-41-7;;
-Ammonium NH4 [mg/l];14798-03-9;0,5;
-Ammonium-N [mg/l];14798-03-9;0,5;
-Nitrit NO2 [mg/l];14797-65-0;0,1;
-Nitrit-N [mg/l];14797-65-0;0,03;
-Nitrat NO3 [mg/l];14797-38-3;50;
-Nitrat-N [mg/l];14797-38-3;11,3;
-Phosphat ortho PO4 [mg/l];14265-44-2;0,15;
-Strömungsgeschwindigkeit [m/s];;;
-Biochemische Sauerstoffbedarf [mg/l];;5;
-Biochemische Sauerstoffbedarf Rest Sauerstoff [%];;;
-Säure- Bindungsvermögen [mmol/l];;;
-Gesamthärte [mmol/l];;;
-Gesamthärte [°dH];;;
+Temperatur Wasser [°C];;25;Work in progress...!
+Temperatur Luft [°C];;30;Work in progress...!
+Sichttiefe [m];;0,5;Work in progress...!
+Leitfähigkeit [µS/cm];;500;Work in progress...!
+Sauerstoff O2 [mg/l];7782-44-7;6;Work in progress...!
+Sauerstoffsättigung O2 [%];7782-44-7;80;Work in progress...!
+pH Wert;;8,5;Work in progress...!
+Ammoniak NH3 [mg/l];7664-41-7;0,5;Work in progress...!
+Ammoniak NH3 [%];7664-41-7;;Work in progress...!
+Ammonium NH4 [mg/l];14798-03-9;0,5;Work in progress...!
+Ammonium-N [mg/l];14798-03-9;0,5;Work in progress...!
+Nitrit NO2 [mg/l];14797-65-0;0,1;Work in progress...!
+Nitrit-N [mg/l];14797-65-0;0,03;Work in progress...!
+Nitrat NO3 [mg/l];14797-38-3;50;Work in progress...!
+Nitrat-N [mg/l];14797-38-3;11,3;Work in progress...!
+Phosphat ortho PO4 [mg/l];14265-44-2;0,15;Work in progress...!
+Strömungsgeschwindigkeit [m/s];;;Work in progress...!
+Biochemische Sauerstoffbedarf [mg/l];;5;Work in progress...!
+Biochemische Sauerstoffbedarf Rest Sauerstoff [%];;;Work in progress...!
+Säure- Bindungsvermögen [mmol/l];;;Work in progress...!
+Gesamthärte [mmol/l];;;Work in progress...!
+Gesamthärte [°dH];;;Work in progress...!
