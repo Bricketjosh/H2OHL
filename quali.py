@@ -209,7 +209,7 @@ st.markdown("""
             <img src="https://raw.githubusercontent.com/Bricketjosh/H2OHL/refs/heads/main/Logo_HL.svg" width="175" style="pointer-events: auto; display: block;">
         </a>
         <a href="https://www.swhl.de/?srsltid=AfmBOoqaZwfb0rqO_kz1y9aCzFmow-wBsqZvHMM13Zp2cpyy06I9_PYW" target="_blank" style="text-decoration: none; flex: 0 0 120px; display: flex; justify-content: center;">
-            <img src="https://raw.githubusercontent.com/Bricketjosh/H2OHL/refs/heads/main/Logo_SW.webp" width="120" style="pointer-events: auto; display: block;">
+            <img src="https://raw.githubusercontent.com/Bricketjosh/H2OHL/refs/heads/main/Logo_SW.webp" width="140" style="pointer-events: auto; display: block;">
         </a>
     </div>
 </div>
