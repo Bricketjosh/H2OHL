@@ -92,23 +92,47 @@ def format_limit_value(value):
     return formatted
 
 
-def get_status_color(value, limit, tolerance=0.05):
+def get_status_color(value, limit, tolerance=0.05, measurement_name=None):
     """
     Determine status color based on value and limit.
-    Green: value < (limit - tolerance)
-    Yellow: (limit - tolerance) <= value < limit
-    Red: value >= limit
+    
+    For most parameters (e.g., pollutants):
+    - Green: value < (limit - tolerance)
+    - Yellow: (limit - tolerance) <= value < limit
+    - Red: value >= limit
+    
+    For oxygen saturation (Sauerstoffsättigung):
+    - Green: value > (limit + tolerance)
+    - Yellow: limit < value <= (limit + tolerance)
+    - Red: value <= limit
+    
+    Args:
+        value: The measured value
+        limit: The limit value
+        tolerance: Tolerance factor (default 0.05)
+        measurement_name: Name of the measurement to determine if special logic applies
+    
     Returns: 'green', 'yellow', or 'red'
     """
     if pd.isna(value) or pd.isna(limit):
         return None
     
-    if value < (limit - tolerance):
-        return "green"
-    elif value < limit:
-        return "yellow"
+    # Special logic for oxygen saturation - lower values are bad
+    if measurement_name and "Sauerstoffsättigung" in measurement_name:
+        if value > (limit + tolerance):
+            return "green"
+        elif value > limit:
+            return "yellow"
+        else:
+            return "red"
     else:
-        return "red"
+        # Default logic - higher values are bad
+        if value < (limit - tolerance):
+            return "green"
+        elif value < limit:
+            return "yellow"
+        else:
+            return "red"
 @st.cache_data
 def get_stations():
     # parse decimal comma numbers correctly
@@ -259,6 +283,11 @@ st.markdown(
 with st.expander("📋 Changelog", expanded=False):
     with st.expander("📅 2026", expanded=False):
         with st.expander("Januar", expanded=False):
+            with st.expander("21.01.2026", expanded=False):
+                st.markdown("""
+                - Sauerstoffsättigung-Grenzwertlogik angepasst: Werte unter Grenzwert werden als kritisch markiert
+                """)
+            
             with st.expander("16.01.2026", expanded=False):
                 st.markdown("""
                 - Header-Layout überarbeitet: Logo und Titel nebeneinander angeordnet
@@ -287,7 +316,7 @@ with st.expander("📋 Changelog", expanded=False):
     st.markdown("""
     <div style="margin-top: 15px; padding: 10px; background-color: #f0f0f0; border-radius: 5px; font-size: 0.85em; color: black;">
         <strong>Version:</strong> WiSe 2025/26 (Work in Progress)<br>
-        <strong>Letzte Aktualisierung:</strong> 16.01.2026
+        <strong>Letzte Aktualisierung:</strong> 21.01.2026
     </div>
     """, unsafe_allow_html=True)
 
@@ -482,7 +511,7 @@ try:
         if measurement_choice in filtered.columns and not filtered.empty:
             latest_value = filtered[measurement_choice].iloc[-1]
             tolerance = 0.05
-            status_color = get_status_color(latest_value, limit, tolerance)
+            status_color = get_status_color(latest_value, limit, tolerance, measurement_choice_display)
             
             if status_color == "green":
                 color_display = "🟢 Grün (OK)"
@@ -546,7 +575,7 @@ if limit is not None:
     
     # Create status column
     def get_status_display(value):
-        status_color = get_status_color(value, limit, tolerance=0.05)
+        status_color = get_status_color(value, limit, tolerance=0.05, measurement_name=measurement_choice_display)
         if status_color == "green":
             return "🟢 OK"
         elif status_color == "yellow":
