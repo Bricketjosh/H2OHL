@@ -282,6 +282,14 @@ st.markdown(
 # Changelog section (collapsible with hierarchical structure: Year > Month > Day)
 with st.expander("📋 Changelog", expanded=False):
     with st.expander("📅 2026", expanded=False):
+        with st.expander("Februar", expanded=False):
+            with st.expander("16.02.2026", expanded=False):
+                st.markdown("""
+                - Einplegen neuer Messtationen aus dem TH-Labor von Prof. Külls (Violette Marker)
+                - Überarbeitung der Kontextinfo-Logik: Maschinenlesbarkeit und Formatierung der CSV-Datei
+                - Kontextinfotexte zu allen Messwerten geschrieben. Für die Messwerte ,,Temperatur Wasser", ,,Temperatur Luft" und ,,Sichttiefe" wurden diese bereits eingefügt.
+                """)
+
         with st.expander("Januar", expanded=False):
             with st.expander("21.01.2026", expanded=False):
                 st.markdown("""
@@ -316,7 +324,7 @@ with st.expander("📋 Changelog", expanded=False):
     st.markdown("""
     <div style="margin-top: 15px; padding: 10px; background-color: #f0f0f0; border-radius: 5px; font-size: 0.85em; color: black;">
         <strong>Version:</strong> WiSe 2025/26 (Work in Progress)<br>
-        <strong>Letzte Aktualisierung:</strong> 21.01.2026
+        <strong>Letzte Aktualisierung:</strong> 16.02.2026
     </div>
     """, unsafe_allow_html=True)
 
