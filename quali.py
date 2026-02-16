@@ -266,6 +266,9 @@ st.write(
         [Labor Prof. Dr. Heymann] [TH-Lübeck] (Homepage einfügen) \\
         Datenherausgeber: [Einfügen] \\
         \\
+        [Labor Prof. Dr. Külls] [TH-Lübeck] (Homepage einfügen) \\
+        Datenherausgeber: [Marcel Kock] \\
+        \\
     Datenlizenz: (Einfügen)"""  # noqa: E501
 )
 
@@ -285,7 +288,7 @@ with st.expander("📋 Changelog", expanded=False):
         with st.expander("Februar", expanded=False):
             with st.expander("16.02.2026", expanded=False):
                 st.markdown("""
-                - Einplegen neuer Messtationen aus dem TH-Labor von Prof. Külls (Violette Marker)
+                - Einplegen neuer Messtationen aus dem TH-Labor von Prof. Külls (Violette Marker). Messdaten folgen (WIP)!
                 - Überarbeitung der Kontextinfo-Logik: Maschinenlesbarkeit und Formatierung der CSV-Datei
                 - Kontextinfotexte zu allen Messwerten geschrieben. Für die Messwerte ,,Temperatur Wasser", ,,Temperatur Luft" und ,,Sichttiefe" wurden diese bereits eingefügt.
                 """)
