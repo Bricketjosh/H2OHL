@@ -684,7 +684,14 @@ try:
         if "Kontextinfo" in infobox_df.columns:
             if pd.notna(row_data.get("Kontextinfo")) and row_data.get("Kontextinfo") != "":
                 st.write("**Kontextinfo:**")
-                st.write(row_data.get('Kontextinfo'))
+                # Process line breaks: convert \n to <br> and render HTML
+                kontextinfo = str(row_data.get('Kontextinfo'))
+                # Replace literal \n with <br> tags
+                kontextinfo = kontextinfo.replace('\\n', '<br>')
+                # Also handle actual newline characters
+                kontextinfo = kontextinfo.replace('\n', '<br>')
+                # Use markdown with HTML enabled to render <br> tags
+                st.markdown(kontextinfo, unsafe_allow_html=True)
     else:
         st.info(f"Keine Kontextinformationen für '{measurement_choice_display}' verfügbar.")
 except Exception as e:
