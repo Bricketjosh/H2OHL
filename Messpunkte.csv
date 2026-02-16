@@ -18,13 +18,14 @@
 17;53.846527;10.724491;Spieringshorst Anleger;Lübecker Kreisverband der Sportfischer e.V.;Wakenitz
 18;53.866260;10.680470;Holstentorbrücke;TEST-Station;Trave
 19;53.908853;10.714241;Kleine Schwartau Brücke;TEST-Station2;Schwartau
-20;53.838045;10.644089;Kanal-Trave;TH-Labor Külls;Trave
-21;53.851907;10.673385;Trave-Kanal (Geniner Ufer);TH-Labor Külls;Trave
+20;53.838045;10.644089;Kanal-Trave;TH-Labor Külls;Elbe-Lübeck-Kanal
+21;53.851907;10.673385;Trave-Kanal (Geniner Ufer);TH-Labor Külls;Kanal-Trave
 22;53.850132;10.629057;Trave B75;TH-Labor Külls;Trave
-23;53.828089;10.697581;Landgraben (Gut Mönkhof);TH-Labor Külls;Trave
-24;53.807678;10.755451;Grönau (Mühlenweg);TH-Labor Külls;Trave
-25;53.781068;10.766304;Wakenitz (Rothenhusen);TH-Labor Külls;Trave
-26;53.796679;10.772178;Wakenitz (Kammerbruch);TH-Labor Külls;Trave
-27;53.836353;10.697876;Trinkwasser (Labor TH);TH-Labor Külls;Trave
+23;53.828089;10.697581;Landgraben (Gut Mönkhof);TH-Labor Külls;Landgraben
+24;53.807678;10.755451;Grönau (Mühlenweg);TH-Labor Külls;Grönau
+25;53.781068;10.766304;Wakenitz (Rothenhusen);TH-Labor Külls;Wakenitz
+26;53.796679;10.772178;Wakenitz (Kammerbruch);TH-Labor Külls;Wakenitz
+27;53.836353;10.697876;Trinkwasser (Labor TH);TH-Labor Külls;Trinkwasser
+
 
 
