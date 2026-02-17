@@ -266,9 +266,6 @@ st.write(
         [Labor Prof. Dr. Heymann] [TH-Lübeck] (Homepage einfügen) \\
         Datenherausgeber: [Einfügen] \\
         \\
-        [Labor Prof. Dr. Külls] [TH-Lübeck] (Homepage einfügen) \\
-        Datenherausgeber: [Marcel Kock] \\
-        \\
     Datenlizenz: (Einfügen)"""  # noqa: E501
 )
 
@@ -288,7 +285,7 @@ with st.expander("📋 Changelog", expanded=False):
         with st.expander("Februar", expanded=False):
             with st.expander("16.02.2026", expanded=False):
                 st.markdown("""
-                - Einplegen neuer Messtationen aus dem TH-Labor von Prof. Külls (Violette Marker). Messdaten folgen (WIP)!
+                - Einplegen neuer Messtationen aus dem TH-Labor von Prof. Külls (Violette Marker)
                 - Überarbeitung der Kontextinfo-Logik: Maschinenlesbarkeit und Formatierung der CSV-Datei
                 - Kontextinfotexte zu allen Messwerten geschrieben. Für die Messwerte ,,Temperatur Wasser", ,,Temperatur Luft" und ,,Sichttiefe" wurden diese bereits eingefügt.
                 """)
@@ -554,102 +551,106 @@ if measurement_choice not in filtered.columns:
     filtered[measurement_choice] = pd.Series(dtype="float64")
 
 # Check if there are any non-null values to plot
-if filtered[measurement_choice].notna().sum() == 0:
+has_chart_data = filtered[measurement_choice].notna().sum() > 0
+chart = None
+
+if not has_chart_data:
     st.warning(f"⚠️ Keine Daten für '{measurement_choice}' im gewählten Zeitraum vorhanden.")
-    st.stop()
 
-# Create a display column for the selected measurement
-filtered[f"{measurement_choice}_display"] = filtered[measurement_choice].apply(
-    lambda x: format_value_with_unit(x, measurement_choice_display)
-)
-
-# Create a cleaned Bemerkung column that shows "N/A" instead of null
-if "Bemerkung" in filtered.columns:
-    filtered["Bemerkung_display"] = filtered["Bemerkung"].apply(
-        lambda x: x if pd.notna(x) and str(x).strip() != "" else "N/A"
+if has_chart_data:
+    # Create a display column for the selected measurement
+    filtered[f"{measurement_choice}_display"] = filtered[measurement_choice].apply(
+        lambda x: format_value_with_unit(x, measurement_choice_display)
     )
 
-# Add limit and status information to tooltip if limit exists
-limit = None
-try:
-    limit_values = get_limit_values()
-    limit_row = limit_values[limit_values["Messwert_cleaned"] == measurement_choice]
-    if not limit_row.empty:
-        limit = limit_row.iloc[0]["Grenzwert"]
-except Exception:
-    pass
-
-if limit is not None:
-    # Create columns for limit display and status
-    unit = extract_unit(measurement_choice_display)
-    filtered["Grenzwert"] = f"{format_limit_value(limit)} {unit}".strip() if unit else format_limit_value(limit)
-    
-    # Create status column
-    def get_status_display(value):
-        status_color = get_status_color(value, limit, tolerance=0.05, measurement_name=measurement_choice_display)
-        if status_color == "green":
-            return "🟢 OK"
-        elif status_color == "yellow":
-            return "🟡 Warnung"
-        else:
-            return "🔴 Grenzwert überschritten"
-    
-    filtered["Status"] = filtered[measurement_choice].apply(get_status_display)
-    
-    # Create tooltip list based on measurement type
-    # For Sichttiefe, add Bemerkung column
-    tooltip_list = [
-        alt.Tooltip("Zeit:T", title="Zeit"), 
-        alt.Tooltip("Uhrzeit:N", title="Uhrzeit"),
-        alt.Tooltip(f"{measurement_choice}_display:N", title=measurement_choice_display)
-    ]
-    
-    # Check if this is Sichttiefe (cleaned name would be "Sichttiefe_m")
-    if "Sichttiefe" in measurement_choice and "Bemerkung_display" in filtered.columns:
-        tooltip_list.append(alt.Tooltip("Bemerkung_display:N", title="Bemerkung"))
-    
-    tooltip_list.extend([
-        alt.Tooltip("Grenzwert:N", title="Grenzwert"), 
-        alt.Tooltip("Status:N", title="Status")
-    ])
-    
-    # Create main chart with primary X-axis (Zeit) and Y-axis (measurement values)
-    # Now using cleaned column names without special characters
-    chart = (
-        alt.Chart(filtered)
-        .mark_line(point=True)
-        .encode(
-            x=alt.X("Zeit:T", title="Zeit [Intervall]", axis=alt.Axis(format="%d.%m.%Y")),
-            y=alt.Y(f"{measurement_choice}:Q", title=measurement_choice_display),
-            tooltip=tooltip_list
+    # Create a cleaned Bemerkung column that shows "N/A" instead of null
+    if "Bemerkung" in filtered.columns:
+        filtered["Bemerkung_display"] = filtered["Bemerkung"].apply(
+            lambda x: x if pd.notna(x) and str(x).strip() != "" else "N/A"
         )
-    )
-else:
-    # Create tooltip list based on measurement type
-    # For Sichttiefe, add Bemerkung column
-    tooltip_list = [
-        alt.Tooltip("Zeit:T", title="Zeit"), 
-        alt.Tooltip("Uhrzeit:N", title="Uhrzeit"),
-        alt.Tooltip(f"{measurement_choice}_display:N", title=measurement_choice_display)
-    ]
-    
-    # Check if this is Sichttiefe (cleaned name would be "Sichttiefe_m")
-    if "Sichttiefe" in measurement_choice and "Bemerkung_display" in filtered.columns:
-        tooltip_list.append(alt.Tooltip("Bemerkung_display:N", title="Bemerkung"))
-    
-    # Create main chart without limit/status if no limit defined
-    # Now using cleaned column names without special characters
-    chart = (
-        alt.Chart(filtered)
-        .mark_line(point=True)
-        .encode(
-            x=alt.X("Zeit:T", title="Zeit [Intervall]", axis=alt.Axis(format="%d.%m.%Y")),
-            y=alt.Y(f"{measurement_choice}:Q", title=measurement_choice_display),
-            tooltip=tooltip_list
-        )
-    )
 
-st.altair_chart(chart, use_container_width=True)
+    # Add limit and status information to tooltip if limit exists
+    limit = None
+    try:
+        limit_values = get_limit_values()
+        limit_row = limit_values[limit_values["Messwert_cleaned"] == measurement_choice]
+        if not limit_row.empty:
+            limit = limit_row.iloc[0]["Grenzwert"]
+    except Exception:
+        pass
+
+    if limit is not None:
+        # Create columns for limit display and status
+        unit = extract_unit(measurement_choice_display)
+        filtered["Grenzwert"] = f"{format_limit_value(limit)} {unit}".strip() if unit else format_limit_value(limit)
+        
+        # Create status column
+        def get_status_display(value):
+            status_color = get_status_color(value, limit, tolerance=0.05, measurement_name=measurement_choice_display)
+            if status_color == "green":
+                return "🟢 OK"
+            elif status_color == "yellow":
+                return "🟡 Warnung"
+            else:
+                return "🔴 Grenzwert überschritten"
+        
+        filtered["Status"] = filtered[measurement_choice].apply(get_status_display)
+        
+        # Create tooltip list based on measurement type
+        # For Sichttiefe, add Bemerkung column
+        tooltip_list = [
+            alt.Tooltip("Zeit:T", title="Zeit"), 
+            alt.Tooltip("Uhrzeit:N", title="Uhrzeit"),
+            alt.Tooltip(f"{measurement_choice}_display:N", title=measurement_choice_display)
+        ]
+        
+        # Check if this is Sichttiefe (cleaned name would be "Sichttiefe_m")
+        if "Sichttiefe" in measurement_choice and "Bemerkung_display" in filtered.columns:
+            tooltip_list.append(alt.Tooltip("Bemerkung_display:N", title="Bemerkung"))
+        
+        tooltip_list.extend([
+            alt.Tooltip("Grenzwert:N", title="Grenzwert"), 
+            alt.Tooltip("Status:N", title="Status")
+        ])
+        
+        # Create main chart with primary X-axis (Zeit) and Y-axis (measurement values)
+        # Now using cleaned column names without special characters
+        chart = (
+            alt.Chart(filtered)
+            .mark_line(point=True)
+            .encode(
+                x=alt.X("Zeit:T", title="Zeit [Intervall]", axis=alt.Axis(format="%d.%m.%Y")),
+                y=alt.Y(f"{measurement_choice}:Q", title=measurement_choice_display),
+                tooltip=tooltip_list
+            )
+        )
+    else:
+        # Create tooltip list based on measurement type
+        # For Sichttiefe, add Bemerkung column
+        tooltip_list = [
+            alt.Tooltip("Zeit:T", title="Zeit"), 
+            alt.Tooltip("Uhrzeit:N", title="Uhrzeit"),
+            alt.Tooltip(f"{measurement_choice}_display:N", title=measurement_choice_display)
+        ]
+        
+        # Check if this is Sichttiefe (cleaned name would be "Sichttiefe_m")
+        if "Sichttiefe" in measurement_choice and "Bemerkung_display" in filtered.columns:
+            tooltip_list.append(alt.Tooltip("Bemerkung_display:N", title="Bemerkung"))
+        
+        # Create main chart without limit/status if no limit defined
+        # Now using cleaned column names without special characters
+        chart = (
+            alt.Chart(filtered)
+            .mark_line(point=True)
+            .encode(
+                x=alt.X("Zeit:T", title="Zeit [Intervall]", axis=alt.Axis(format="%d.%m.%Y")),
+                y=alt.Y(f"{measurement_choice}:Q", title=measurement_choice_display),
+                tooltip=tooltip_list
+            )
+        )
+
+if chart is not None:
+    st.altair_chart(chart, use_container_width=True)
 
 # Context information section
 st.write("")
@@ -746,46 +747,53 @@ except Exception:
 
 # Download button for the chart
 try:
-    # Create a higher resolution version for export
-    chart_export = chart.properties(
-        width=1200,
-        height=600,
-        title={
-            "text": f"Station {number} - {measurement_choice_display}",
-            "subtitle": f"Zeitraum: {start_ts.strftime('%d.%m.%Y')} - {end_ts.strftime('%d.%m.%Y')}"
-        }
-    ).configure_axis(
-        labelFontSize=14,
-        titleFontSize=16
-    ).configure_title(
-        fontSize=18,
-        subtitleFontSize=14
-    )
-    
-    # Export as HTML with embedded Vega-Lite spec (can be opened in browser and saved as image)
-    html_string = f"""
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
-        <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
-        <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
-    </head>
-    <body>
-        <div id="vis"></div>
-        <script type="text/javascript">
-            vegaEmbed('#vis', {chart_export.to_json()}, {{"actions": {{"export": true, "source": false, "editor": false}}}});
-        </script>
-    </body>
-    </html>
-    """
+    html_string = ""
+    if chart is not None:
+        # Create a higher resolution version for export
+        chart_export = chart.properties(
+            width=1200,
+            height=600,
+            title={
+                "text": f"Station {number} - {measurement_choice_display}",
+                "subtitle": f"Zeitraum: {start_ts.strftime('%d.%m.%Y')} - {end_ts.strftime('%d.%m.%Y')}"
+            }
+        ).configure_axis(
+            labelFontSize=14,
+            titleFontSize=16
+        ).configure_title(
+            fontSize=18,
+            subtitleFontSize=14
+        )
+        
+        # Export as HTML with embedded Vega-Lite spec (can be opened in browser and saved as image)
+        html_string = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+            <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
+            <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+        </head>
+        <body>
+            <div id="vis"></div>
+            <script type="text/javascript">
+                vegaEmbed('#vis', {chart_export.to_json()}, {{"actions": {{"export": true, "source": false, "editor": false}}}});
+            </script>
+        </body>
+        </html>
+        """
     
     st.download_button(
         label="📊 Diagramm als HTML herunterladen",
         data=html_string,
         file_name=f"Station_{number}_{measurement_choice}_{start_ts.strftime('%Y%m%d')}-{end_ts.strftime('%Y%m%d')}.html",
         mime="text/html",
-        help="Diagramm als HTML herunterladen - öffnen Sie die Datei im Browser und nutzen Sie das ⋮-Menü rechts oben im Diagramm zum Export als PNG/SVG"
+        help=(
+            "Diagramm als HTML herunterladen - öffnen Sie die Datei im Browser und nutzen Sie das ⋮-Menü rechts oben im Diagramm zum Export als PNG/SVG"
+            if chart is not None
+            else "Kein Diagramm für den gewählten Zeitraum verfügbar"
+        ),
+        disabled=chart is None
     )
 except Exception as e:
     st.warning(f"Diagramm-Download konnte nicht erstellt werden: {str(e)}")
