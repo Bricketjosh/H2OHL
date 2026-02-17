@@ -266,6 +266,9 @@ st.write(
         [Labor Prof. Dr. Heymann] [TH-Lübeck] (Homepage einfügen) \\
         Datenherausgeber: [Einfügen] \\
         \\
+        [Labor Prof. Dr. Külls] [TH-Lübeck] (Homepage einfügen) \\
+        Datenherausgeber: [Marcel Kock] \\
+        \\
     Datenlizenz: (Einfügen)"""  # noqa: E501
 )
 
@@ -283,6 +286,12 @@ st.markdown(
 with st.expander("📋 Changelog", expanded=False):
     with st.expander("📅 2026", expanded=False):
         with st.expander("Februar", expanded=False):
+            with st.expander("17.02.2026", expanded=False):
+                st.markdown("""
+                - Vervollständigung der Kontextinfotexte
+                - BugFix: Nun werden auch, wenn keine Daten vorhanden sind und Diagramm erstellt wird die Abschnitte ,,Kontextinformationen" und ,,Downloads" richtig dargestellt.
+                """)
+
             with st.expander("16.02.2026", expanded=False):
                 st.markdown("""
                 - Einplegen neuer Messtationen aus dem TH-Labor von Prof. Külls (Violette Marker)
